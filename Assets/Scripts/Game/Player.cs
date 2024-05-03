@@ -7,11 +7,23 @@ namespace Game
 {
 	public partial class Player : ViewController
 	{
+		private static readonly int s_Speed = Animator.StringToHash("Speed");
+
 		private void Start()
 		{
 			MouseManager.OnMouseClicked
 			   .Register(MoveToTarget)
 			   .UnRegisterWhenDisabled(gameObject);
+		}
+
+		private void Update()
+		{
+			SwitchAnimation();
+		}
+
+		private void SwitchAnimation()
+		{
+			SelfAnimator.SetFloat(s_Speed, SelfNavMeshAgent.velocity.sqrMagnitude);
 		}
 
 		private void MoveToTarget(Vector3 targetPoint)
