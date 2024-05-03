@@ -12,6 +12,16 @@ namespace Game
 	public partial class Slime : ViewController
 	{
 		[SerializeField] private EnemyState _EnemyState;
+		[SerializeField] private float _ViewRange;
+
+		private Collider[] _Colliders = new Collider[10];
+		private int _PlayerLayerMask;
+		private string[] _LayerNames = new[] { "Player" };
+
+		private void Start()
+		{
+			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
+		}
 
 		private void Update()
 		{
@@ -20,6 +30,11 @@ namespace Game
 
 		private void SwitchStates()
 		{
+			if (IsPlayerInRange())
+			{
+				_EnemyState = EnemyState.CHASE;
+			}
+
 			switch (_EnemyState)
 			{
 				case EnemyState.GUARD: break;
@@ -27,6 +42,19 @@ namespace Game
 				case EnemyState.CHASE: break;
 				case EnemyState.DEAD: break;
 			}
+		}
+
+		private bool IsPlayerInRange()
+		{
+			int numColliders = Physics.OverlapSphereNonAlloc(transform.position, _ViewRange, _Colliders, _PlayerLayerMask);
+			for (int i = 0; i < numColliders; i++)
+			{
+				if (_Colliders[i].CompareTag("Player"))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
