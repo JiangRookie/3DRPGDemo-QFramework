@@ -1,3 +1,4 @@
+using System.Collections;
 using QFramework;
 using UnityEngine;
 
@@ -8,17 +9,26 @@ namespace Game
 	public partial class Player : ViewController
 	{
 		private static readonly int s_Speed = Animator.StringToHash("Speed");
+		private static readonly int s_Attack = Animator.StringToHash("Attack");
+		private float _AttackCooldown;
+		private GameObject _AttackTarget;
 
 		private void Start()
 		{
 			MouseManager.OnMouseClicked
 			   .Register(MoveToTarget)
-			   .UnRegisterWhenDisabled(gameObject);
+			   .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+			MouseManager.OnEnemyClicked
+			   .Register(MoveToAttackTarget)
+			   .UnRegisterWhenGameObjectDestroyed(gameObject);
 		}
 
 		private void Update()
 		{
 			SwitchAnimation();
+
+			_AttackCooldown -= Time.deltaTime;
 		}
 
 		private void SwitchAnimation()
@@ -28,7 +38,39 @@ namespace Game
 
 		private void MoveToTarget(Vector3 targetPoint)
 		{
+			StopAllCoroutines();
+			SelfNavMeshAgent.isStopped = false;
 			SelfNavMeshAgent.destination = targetPoint;
+		}
+
+		private void MoveToAttackTarget(GameObject targetGameObj)
+		{
+			if (targetGameObj)
+			{
+				_AttackTarget = targetGameObj;
+				StartCoroutine(MoveToAttackTargetCoroutine());
+			}
+		}
+
+		private IEnumerator MoveToAttackTargetCoroutine()
+		{
+			SelfNavMeshAgent.isStopped = false;
+
+			transform.LookAt(_AttackTarget.transform);
+
+			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > 1)
+			{
+				SelfNavMeshAgent.destination = _AttackTarget.Position();
+				yield return null;
+			}
+
+			SelfNavMeshAgent.isStopped = true;
+
+			if (_AttackCooldown < 0)
+			{
+				SelfAnimator.SetTrigger(s_Attack);
+				_AttackCooldown = 0.5f;
+			}
 		}
 	}
 }

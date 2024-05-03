@@ -8,6 +8,7 @@ namespace Game
 	public partial class MouseManager : ViewController
 	{
 		public static EasyEvent<Vector3> OnMouseClicked = new EasyEvent<Vector3>();
+		public static EasyEvent<GameObject> OnEnemyClicked = new EasyEvent<GameObject>();
 		private RaycastHit hitInfo;
 
 		private void Update()
@@ -43,6 +44,11 @@ namespace Game
 				if (hitInfo.collider.gameObject.CompareTag("Ground"))
 				{
 					OnMouseClicked.Trigger(hitInfo.point);
+				}
+
+				if (hitInfo.collider.gameObject.CompareTag("Enemy"))
+				{
+					OnEnemyClicked.Trigger(hitInfo.collider.gameObject);
 				}
 			}
 		}
