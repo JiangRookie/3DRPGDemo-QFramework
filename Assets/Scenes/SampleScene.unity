@@ -15108,8 +15108,11 @@ MonoBehaviour:
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
   SelfNavMeshAgent: {fileID: 7153141402791051688}
+  SelfAnimator: {fileID: 8035681660017185165}
   _EnemyState: 0
-  _ViewRange: 10
+  _ViewRange: 6
+  _PatrolRange: 8
+  _LookAtTime: 3
   _IsGuard: 0
 --- !u!65 &7153141402791051687
 BoxCollider:
@@ -15161,6 +15164,8 @@ MonoBehaviour:
   Binds:
   - MemberName: SelfNavMeshAgent
     Object: {fileID: 7153141402791051688}
+  - MemberName: SelfAnimator
+    Object: {fileID: 8035681660017185165}
 --- !u!1 &7446019048431048860
 GameObject:
   m_ObjectHideFlags: 0
@@ -15202,7 +15207,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7153141402791051685}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.05, y: 0.5, z: -0.93}
+  m_LocalPosition: {x: -6.41, y: 0.5, z: 0.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6219856072657778382}

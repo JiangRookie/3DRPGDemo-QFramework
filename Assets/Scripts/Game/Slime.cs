@@ -16,27 +16,50 @@ namespace Game
 		private static readonly int s_Chase = Animator.StringToHash("Chase");
 		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
+		[SerializeField] private float _PatrolRange;
+		[SerializeField] private float _LookAtTime;
 		[SerializeField] private bool _IsGuard;
 		private GameObject _AttackTarget;
-
 		private Collider[] _Colliders = new Collider[10];
+		private Vector3 _InitPosition;
 		private float _InitSpeed;
 		private bool _IsChase;
 		private bool _IsFollow;
 		private bool _IsWalk;
 		private string[] _LayerNames = new[] { "Player" };
 		private int _PlayerLayerMask;
+		private float _RemainLookAtTime;
+
+		private Vector3 _WayPoint;
 
 		private void Start()
 		{
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 			_InitSpeed = SelfNavMeshAgent.speed;
+			_InitPosition = this.Position();
+			_RemainLookAtTime = _LookAtTime;
+			if (_IsGuard)
+			{
+				_EnemyState = EnemyState.GUARD;
+			}
+			else
+			{
+				_EnemyState = EnemyState.PATROL;
+				GenerateRandomPatrolPoint();
+			}
 		}
 
 		private void Update()
 		{
 			SwitchStates();
 			SetAnimationState();
+		}
+
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.red;
+			Gizmos.DrawWireSphere(this.Position(), _ViewRange);
+			Gizmos.DrawWireSphere(this.Position(), _PatrolRange);
 		}
 
 		private void SetAnimationState()
@@ -72,7 +95,29 @@ namespace Game
 
 		public void Guard() { }
 
-		public void Patrol() { }
+		public void Patrol()
+		{
+			_IsChase = false;
+			SelfNavMeshAgent.speed = _InitSpeed * 0.5f;
+			if (Vector3.Distance(this.Position(), _WayPoint) <= SelfNavMeshAgent.stoppingDistance)
+			{
+				_IsWalk = false;
+				if (_RemainLookAtTime > 0)
+				{
+					_RemainLookAtTime -= Time.deltaTime;
+				}
+				else
+				{
+					_RemainLookAtTime = _LookAtTime;
+					GenerateRandomPatrolPoint();
+				}
+			}
+			else
+			{
+				_IsWalk = true;
+				SelfNavMeshAgent.destination = _WayPoint;
+			}
+		}
 
 		public void Chase()
 		{
@@ -82,7 +127,19 @@ namespace Game
 			if (!IsPlayerInRange())
 			{
 				_IsFollow = false;
-				SelfNavMeshAgent.destination = this.Position();
+				if (_RemainLookAtTime > 0)
+				{
+					SelfNavMeshAgent.destination = this.Position();
+					_RemainLookAtTime -= Time.deltaTime;
+				}
+				else if (_IsGuard)
+				{
+					_EnemyState = EnemyState.GUARD;
+				}
+				else
+				{
+					_EnemyState = EnemyState.PATROL;
+				}
 			}
 			else
 			{
@@ -107,6 +164,16 @@ namespace Game
 
 			_AttackTarget = null;
 			return false;
+		}
+
+		private void GenerateRandomPatrolPoint()
+		{
+			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
+			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
+			var newPoint = new Vector3(_InitPosition.x + randomX, this.Position().y, _InitPosition.z + randomZ);
+			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
+				? hit.position
+				: this.Position();
 		}
 	}
 }
