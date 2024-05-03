@@ -29,6 +29,9 @@ namespace Game
 					case "Ground":
 						Cursor.SetCursor(Target, new Vector2(16, 16), CursorMode.Auto);
 						break;
+					case "Enemy":
+						Cursor.SetCursor(Attack, new Vector2(16, 16), CursorMode.Auto);
+						break;
 				}
 			}
 		}
