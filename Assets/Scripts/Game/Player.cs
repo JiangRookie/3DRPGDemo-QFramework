@@ -18,6 +18,8 @@ namespace Game
 
 		private void Start()
 		{
+			GameManager.Instance.RegisterPlayer(SelfCharacterData);
+
 			MouseManager.OnMouseClicked
 			   .Register(MoveToTarget)
 			   .UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -29,7 +31,11 @@ namespace Game
 
 		private void Update()
 		{
-			_IsDead = SelfCharacterData.CurHealth <= 0;
+			if (SelfCharacterData.CurHealth <= 0)
+			{
+				_IsDead = true;
+				GameManager.Instance.NotifyObservers();
+			}
 			_AttackCooldown -= Time.deltaTime;
 			SwitchAnimation();
 		}
@@ -62,7 +68,7 @@ namespace Game
 
 			transform.LookAt(_AttackTarget.transform);
 
-			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > SelfCharacterData.AttackRange)
+			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > SelfCharacterData.AttackRange + +SelfNavMeshAgent.stoppingDistance)
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
 				yield return null;
@@ -70,10 +76,14 @@ namespace Game
 
 			SelfNavMeshAgent.isStopped = true;
 
+			AttackTarget();
+		}
+
+		private void AttackTarget()
+		{
 			if (_AttackCooldown < 0)
 			{
 				DamageCalculator.CalculateIsCritical(SelfCharacterData);
-				Debug.Log("Player IsCritical: " + SelfCharacterData.IsCritical);
 				SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
 				SelfAnimator.SetTrigger(s_Attack);
 				_AttackCooldown = SelfCharacterData.CoolDown;

@@ -11,7 +11,7 @@ namespace Game
 	public enum EnemyState { GUARD, PATROL, CHASE, DEAD }
 
 	[RequireComponent(typeof(NavMeshAgent))]
-	public partial class Slime : ViewController
+	public partial class Slime : ViewController, IEndGameObserver
 	{
 		private static readonly int s_Walk = Animator.StringToHash("Walk");
 		private static readonly int s_Follow = Animator.StringToHash("Follow");
@@ -20,6 +20,7 @@ namespace Game
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
 		private static readonly int s_Critical = Animator.StringToHash("Critical");
 		private static readonly int s_Die = Animator.StringToHash("Die");
+		private static readonly int s_Win = Animator.StringToHash("Win");
 
 		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
@@ -41,6 +42,7 @@ namespace Game
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
 		private Vector3 _WayPoint;
+		private bool _PlayerIsDead;
 
 		private void Awake()
 		{
@@ -66,16 +68,41 @@ namespace Game
 
 		private void Update()
 		{
-			_IsDead = SelfCharacterData.CurHealth <= 0;
-			_LastAttackTime -= Time.deltaTime;
-			SwitchStates();
-			SetAnimationState();
+			if (SelfCharacterData.CurHealth <= 0)
+			{
+				_IsDead = true;
+			}
+			if (!_PlayerIsDead)
+			{
+				_LastAttackTime -= Time.deltaTime;
+				SwitchStates();
+				SetAnimationState();
+			}
+		}
+
+		private void OnEnable()
+		{
+			GameManager.Instance.AddObserver(this);
+		}
+
+		private void OnDisable()
+		{
+			GameManager.Instance.RemoveObserver(this);
 		}
 
 		private void OnDrawGizmosSelected()
 		{
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(this.Position(), _ViewRange);
+		}
+
+		public void EndNotify()
+		{
+			SelfAnimator.SetBool(s_Win, true);
+			_PlayerIsDead = true;
+			_IsChase = false;
+			_IsWalk = false;
+			_AttackTarget = null;
 		}
 
 		private void SetAnimationState()
@@ -189,15 +216,7 @@ namespace Game
 			{
 				_IsFollow = false;
 				SelfNavMeshAgent.isStopped = true;
-				if (_LastAttackTime < 0)
-				{
-					_LastAttackTime = SelfCharacterData.CoolDown;
-					DamageCalculator.CalculateIsCritical(SelfCharacterData);
-					Debug.Log("Slime IsCritical: " + SelfCharacterData.IsCritical);
-
-					// 执行攻击
-					Attack();
-				}
+				AttackTarget();
 			}
 		}
 
@@ -208,16 +227,21 @@ namespace Game
 			Destroy(gameObject, 2f);
 		}
 
-		private void Attack()
+		private void AttackTarget()
 		{
-			transform.LookAt(_AttackTarget.transform);
-			if (IsTargetInAttackRange())
+			if (_LastAttackTime < 0)
 			{
-				SelfAnimator.SetTrigger(s_Attack);
-			}
-			if (IsTargetInSkillRange())
-			{
-				SelfAnimator.SetTrigger(s_Skill);
+				_LastAttackTime = SelfCharacterData.CoolDown;
+				DamageCalculator.CalculateIsCritical(SelfCharacterData);
+				transform.LookAt(_AttackTarget.transform);
+				if (IsTargetInAttackRange())
+				{
+					SelfAnimator.SetTrigger(s_Attack);
+				}
+				if (IsTargetInSkillRange())
+				{
+					SelfAnimator.SetTrigger(s_Skill);
+				}
 			}
 		}
 
@@ -251,7 +275,7 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.AttackRange;
+				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.AttackRange + SelfNavMeshAgent.stoppingDistance;
 			}
 			return false;
 		}
@@ -260,7 +284,7 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.SkillRange;
+				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.SkillRange + SelfNavMeshAgent.stoppingDistance;
 			}
 			return false;
 		}
