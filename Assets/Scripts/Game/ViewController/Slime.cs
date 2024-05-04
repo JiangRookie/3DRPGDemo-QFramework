@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using QFramework;
 using UnityEngine;
@@ -8,10 +9,10 @@ using Random = UnityEngine.Random;
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
-	public enum EnemyState { GUARD, PATROL, CHASE, DEAD }
+	public enum EnemyState { Guard, Patrol, Chase, Dead }
 
 	[RequireComponent(typeof(NavMeshAgent))]
-	public partial class Slime : ViewController, IEndGameObserver
+	public partial class Slime : ViewController, IEndGameObserver, IGetHit
 	{
 		private static readonly int s_Walk = Animator.StringToHash("Walk");
 		private static readonly int s_Follow = Animator.StringToHash("Follow");
@@ -21,6 +22,7 @@ namespace Game
 		private static readonly int s_Critical = Animator.StringToHash("Critical");
 		private static readonly int s_Die = Animator.StringToHash("Die");
 		private static readonly int s_Win = Animator.StringToHash("Win");
+		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
 
 		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
@@ -39,10 +41,10 @@ namespace Game
 		private bool _IsWalk;
 		private float _LastAttackTime;
 		private string[] _LayerNames = new[] { "Player" };
+		private bool _PlayerIsDead;
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
 		private Vector3 _WayPoint;
-		private bool _PlayerIsDead;
 
 		private void Awake()
 		{
@@ -57,11 +59,11 @@ namespace Game
 		{
 			if (_IsGuard)
 			{
-				_EnemyState = EnemyState.GUARD;
+				_EnemyState = EnemyState.Guard;
 			}
 			else
 			{
-				_EnemyState = EnemyState.PATROL;
+				_EnemyState = EnemyState.Patrol;
 				GenerateRandomPatrolPoint();
 			}
 			GameManager.Instance.AddObserver(this);
@@ -101,6 +103,11 @@ namespace Game
 			_AttackTarget = null;
 		}
 
+		public void GetHit()
+		{
+			SelfAnimator.SetTrigger(s_GetHit);
+		}
+
 		private void SetAnimationState()
 		{
 			SelfAnimator.SetBool(s_Walk, _IsWalk);
@@ -114,25 +121,25 @@ namespace Game
 		{
 			if (_IsDead)
 			{
-				_EnemyState = EnemyState.DEAD;
+				_EnemyState = EnemyState.Dead;
 			}
 			else if (IsPlayerInRange())
 			{
-				_EnemyState = EnemyState.CHASE;
+				_EnemyState = EnemyState.Chase;
 			}
 
 			switch (_EnemyState)
 			{
-				case EnemyState.GUARD:
+				case EnemyState.Guard:
 					Guard();
 					break;
-				case EnemyState.PATROL:
+				case EnemyState.Patrol:
 					Patrol();
 					break;
-				case EnemyState.CHASE:
+				case EnemyState.Chase:
 					Chase();
 					break;
-				case EnemyState.DEAD:
+				case EnemyState.Dead:
 					Dead();
 					break;
 			}
@@ -194,11 +201,11 @@ namespace Game
 				}
 				else if (_IsGuard)
 				{
-					_EnemyState = EnemyState.GUARD;
+					_EnemyState = EnemyState.Guard;
 				}
 				else
 				{
-					_EnemyState = EnemyState.PATROL;
+					_EnemyState = EnemyState.Patrol;
 				}
 			}
 			else
@@ -228,7 +235,7 @@ namespace Game
 			if (_LastAttackTime < 0)
 			{
 				_LastAttackTime = SelfCharacterData.CoolDown;
-				DamageCalculator.CalculateIsCritical(SelfCharacterData);
+				SelfCharacterData.IsCritical = Random.value <= SelfCharacterData.CriticalHitRate;
 				transform.LookAt(_AttackTarget.transform);
 				if (IsTargetInAttackRange())
 				{
@@ -290,11 +297,23 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>(), () =>
+				TakeDamage(SelfCharacterData, () =>
 				{
-					StartCoroutine(PlayGetHitAnimationWithDelay(_AttackTarget.GetComponent<Animator>(), "GetHit", 1f));
+					_AttackTarget.GetComponent<IGetHit>().GetHit();
 				});
 			}
+		}
+
+		private void TakeDamage(CharacterData attacker, Action criticalAction)
+		{
+			float baseDamage = Random.Range(attacker.MinDamage, attacker.MaxDamage + 1);
+			if (attacker.IsCritical)
+			{
+				baseDamage *= attacker.CriticalHitBonusPercentage;
+				criticalAction?.Invoke();
+			}
+			int realDamage = Mathf.Max((int)baseDamage - PlayerData.CurDefense.Value, 1);
+			PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - realDamage, 0);
 		}
 
 		private IEnumerator PlayGetHitAnimationWithDelay(Animator animator, string triggerName, float delay)

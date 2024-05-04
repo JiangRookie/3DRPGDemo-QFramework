@@ -1,12 +1,14 @@
+using System;
 using System.Collections;
 using QFramework;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // 1.请在菜单 编辑器扩展/Namespace Settings 里设置命名空间
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
-	public partial class Player : ViewController
+	public partial class Player : ViewController, IGetHit
 	{
 		private static readonly int s_Speed = Animator.StringToHash("Speed");
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
@@ -15,11 +17,10 @@ namespace Game
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
 		private bool _IsDead;
+		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
 
 		private void Start()
 		{
-			GameManager.Instance.RegisterPlayer(SelfCharacterData);
-
 			MouseManager.OnMouseClicked
 			   .Register(MoveToTarget)
 			   .UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -31,7 +32,7 @@ namespace Game
 
 		private void Update()
 		{
-			if (SelfCharacterData.CurHealth <= 0)
+			if (PlayerData.CurHealth.Value <= 0)
 			{
 				_IsDead = true;
 				GameManager.Instance.NotifyObservers();
@@ -70,7 +71,7 @@ namespace Game
 
 			transform.LookAt(_AttackTarget.transform);
 
-			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > SelfCharacterData.AttackRange + +SelfNavMeshAgent.stoppingDistance)
+			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > PlayerData.AttackRange.Value + +SelfNavMeshAgent.stoppingDistance)
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
 				yield return null;
@@ -85,10 +86,10 @@ namespace Game
 		{
 			if (_AttackCooldown < 0)
 			{
-				DamageCalculator.CalculateIsCritical(SelfCharacterData);
-				SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
+				PlayerData.IsCritical.Value = Random.value <= PlayerData.CriticalHitRate.Value;
+				SelfAnimator.SetBool(s_Critical, PlayerData.IsCritical.Value);
 				SelfAnimator.SetTrigger(s_Attack);
-				_AttackCooldown = SelfCharacterData.CoolDown;
+				_AttackCooldown = PlayerData.CoolDown.Value;
 			}
 		}
 
@@ -96,17 +97,28 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>(), () =>
+				TakeDamage(_AttackTarget.GetComponent<CharacterData>(), () =>
 				{
-					StartCoroutine(PlayGetHitAnimationWithDelay(_AttackTarget.GetComponent<Animator>(), "GetHit", 1f));
+					_AttackTarget.GetComponent<IGetHit>().GetHit();
 				});
 			}
 		}
 
-		private IEnumerator PlayGetHitAnimationWithDelay(Animator animator, string triggerName, float delay)
+		public void GetHit()
 		{
-			yield return new WaitForSeconds(delay);
-			animator.SetTrigger(triggerName);
+			SelfAnimator.SetTrigger(s_GetHit);
+		}
+
+		private void TakeDamage(CharacterData target, Action criticalAction)
+		{
+			float baseDamage = Random.Range(PlayerData.MinDamage.Value, PlayerData.MaxDamage.Value + 1);
+			if (PlayerData.IsCritical.Value)
+			{
+				baseDamage *= PlayerData.CriticalHitBonusPercentage.Value;
+				criticalAction?.Invoke();
+			}
+			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
+			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
 		}
 	}
 }

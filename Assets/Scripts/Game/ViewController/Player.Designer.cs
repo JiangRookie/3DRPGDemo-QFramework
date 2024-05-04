@@ -1,4 +1,4 @@
-// Generate Id:c38646b9-c1f2-41bb-ac73-340f3bdbe190
+// Generate Id:9764bbe1-5f69-450b-898b-150e3352e149
 using UnityEngine;
 
 // 1.请在菜单 编辑器扩展/Namespace Settings 里设置命名空间
@@ -11,8 +11,6 @@ namespace Game
 		public UnityEngine.AI.NavMeshAgent SelfNavMeshAgent;
 
 		public UnityEngine.Animator SelfAnimator;
-
-		public Game.CharacterData SelfCharacterData;
 
 	}
 }

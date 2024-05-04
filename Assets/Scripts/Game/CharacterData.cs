@@ -7,7 +7,7 @@ namespace Game
 		public CharacterCommonData_SO CharacterBaseData;
 		public CharacterCommonData_SO TemplateData;
 		public AttackData_SO CharacterAttackData;
-		[HideInInspector] public bool IsCritical;
+		public bool IsCritical { get; set; }
 
 		#region CharacterBaseData
 
