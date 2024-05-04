@@ -5,10 +5,19 @@ namespace Game
 	public class CharacterData : MonoBehaviour
 	{
 		public CharacterCommonData_SO CharacterBaseData;
+		public CharacterCommonData_SO TemplateData;
 		public AttackData_SO CharacterAttackData;
 		[HideInInspector] public bool IsCritical;
 
 		#region CharacterBaseData
+
+		private void Awake()
+		{
+			if (TemplateData)
+			{
+				CharacterBaseData = Instantiate(TemplateData);
+			}
+		}
 
 		public int MaxHealth
 		{

@@ -49,12 +49,14 @@ namespace Game
 		private void MoveToTarget(Vector3 targetPoint)
 		{
 			StopAllCoroutines();
+			if (_IsDead) return;
 			SelfNavMeshAgent.isStopped = false;
 			SelfNavMeshAgent.destination = targetPoint;
 		}
 
 		private void MoveToAttackTarget(GameObject targetGameObj)
 		{
+			if (_IsDead) return;
 			if (targetGameObj)
 			{
 				_AttackTarget = targetGameObj;

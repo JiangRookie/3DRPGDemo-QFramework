@@ -64,6 +64,7 @@ namespace Game
 				_EnemyState = EnemyState.PATROL;
 				GenerateRandomPatrolPoint();
 			}
+			GameManager.Instance.AddObserver(this);
 		}
 
 		private void Update()
@@ -78,11 +79,6 @@ namespace Game
 				SwitchStates();
 				SetAnimationState();
 			}
-		}
-
-		private void OnEnable()
-		{
-			GameManager.Instance.AddObserver(this);
 		}
 
 		private void OnDisable()

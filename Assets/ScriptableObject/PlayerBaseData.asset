@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PlayerBaseData
   m_EditorClassIdentifier: 
   MaxHealth: 100
-  CurHealth: 4
+  CurHealth: 0
   BaseDefense: 2
   CurDefense: 2
