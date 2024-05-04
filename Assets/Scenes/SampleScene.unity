@@ -6170,7 +6170,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 984679953}
-  m_LocalRotation: {x: 0.0000000033423069, y: 0.98095244, z: -0.19424808, w: 0.000000016878642}
+  m_LocalRotation: {x: -0.0000000033423069, y: 0.98095244, z: -0.19424808, w: -0.000000016878642}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -11256,7 +11256,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948767722}
-  m_LocalRotation: {x: 0.0000000068471717, y: 0.973249, z: -0.22975294, w: 0.000000029005083}
+  m_LocalRotation: {x: -0.0000000068471717, y: 0.973249, z: -0.22975294, w: -0.000000029005083}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -14130,6 +14130,7 @@ GameObject:
   - component: {fileID: 2066896391098508028}
   - component: {fileID: 2066896391098508026}
   - component: {fileID: 2066896391098508024}
+  - component: {fileID: 2066896391098508030}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -14192,6 +14193,8 @@ MonoBehaviour:
     Object: {fileID: 2066896391098508022}
   - MemberName: SelfAnimator
     Object: {fileID: 2066896391089148233}
+  - MemberName: SelfCharacterData
+    Object: {fileID: 2066896391098508030}
 --- !u!1 &2066896391098508025
 GameObject:
   m_ObjectHideFlags: 0
@@ -14228,6 +14231,7 @@ MonoBehaviour:
   ArchitectureFullTypeName: 
   SelfNavMeshAgent: {fileID: 2066896391098508022}
   SelfAnimator: {fileID: 2066896391089148233}
+  SelfCharacterData: {fileID: 2066896391098508030}
 --- !u!1 &2066896391098508027
 GameObject:
   m_ObjectHideFlags: 0
@@ -14274,6 +14278,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &2066896391098508030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066896391098508021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aa3784f94ba4da9a6ee103eb246caaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CharacterBaseData: {fileID: 11400000, guid: d55da5cda34ff694c898e84d15c69f25, type: 2}
 --- !u!1 &2066896391098508031
 GameObject:
   m_ObjectHideFlags: 0
@@ -15082,6 +15099,7 @@ GameObject:
   - component: {fileID: 7153141402791051687}
   - component: {fileID: 7153141402791051686}
   - component: {fileID: 7153141402791051689}
+  - component: {fileID: 7153141402791051690}
   m_Layer: 7
   m_Name: Slime
   m_TagString: Enemy
@@ -15109,6 +15127,7 @@ MonoBehaviour:
   ArchitectureFullTypeName: 
   SelfNavMeshAgent: {fileID: 7153141402791051688}
   SelfAnimator: {fileID: 8035681660017185165}
+  SelfCharacterData: {fileID: 7153141402791051690}
   _EnemyState: 0
   _ViewRange: 6
   _PatrolRange: 8
@@ -15166,6 +15185,21 @@ MonoBehaviour:
     Object: {fileID: 7153141402791051688}
   - MemberName: SelfAnimator
     Object: {fileID: 8035681660017185165}
+  - MemberName: SelfCharacterData
+    Object: {fileID: 7153141402791051690}
+--- !u!114 &7153141402791051690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153141402791051685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aa3784f94ba4da9a6ee103eb246caaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CharacterBaseData: {fileID: 11400000, guid: 2f4d6125bd7c9654fa5ca6c46020cd97, type: 2}
 --- !u!1 &7446019048431048860
 GameObject:
   m_ObjectHideFlags: 0
