@@ -14,6 +14,9 @@ namespace Game
 		private static readonly int s_Walk = Animator.StringToHash("Walk");
 		private static readonly int s_Follow = Animator.StringToHash("Follow");
 		private static readonly int s_Chase = Animator.StringToHash("Chase");
+		private static readonly int s_Skill = Animator.StringToHash("Skill");
+		private static readonly int s_Attack = Animator.StringToHash("Attack");
+		private static readonly int s_Critical = Animator.StringToHash("Critical");
 		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
@@ -26,6 +29,7 @@ namespace Game
 		private bool _IsChase;
 		private bool _IsFollow;
 		private bool _IsWalk;
+		private float _LastAttackTime;
 		private string[] _LayerNames = new[] { "Player" };
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
@@ -53,6 +57,7 @@ namespace Game
 		{
 			SwitchStates();
 			SetAnimationState();
+			_LastAttackTime -= Time.deltaTime;
 		}
 
 		private void OnDrawGizmosSelected()
@@ -67,6 +72,7 @@ namespace Game
 			SelfAnimator.SetBool(s_Walk, _IsWalk);
 			SelfAnimator.SetBool(s_Follow, _IsFollow);
 			SelfAnimator.SetBool(s_Chase, _IsChase);
+			SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
 		}
 
 		private void SwitchStates()
@@ -145,10 +151,38 @@ namespace Game
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
 				_IsFollow = true;
+				SelfNavMeshAgent.isStopped = false;
+			}
+
+			if (IsTargetInAttackRange() || IsTargetInSkillRange())
+			{
+				_IsFollow = false;
+				SelfNavMeshAgent.isStopped = true;
+				if (_LastAttackTime < 0)
+				{
+					_LastAttackTime = SelfCharacterData.CoolDown;
+					SelfCharacterData.IsCritical = Random.value < SelfCharacterData.CriticalHitRate;
+
+					// 执行攻击
+					Attack();
+				}
 			}
 		}
 
 		public void Dead() { }
+
+		private void Attack()
+		{
+			transform.LookAt(_AttackTarget.transform);
+			if (IsTargetInAttackRange())
+			{
+				SelfAnimator.SetTrigger(s_Attack);
+			}
+			if (IsTargetInSkillRange())
+			{
+				SelfAnimator.SetTrigger(s_Skill);
+			}
+		}
 
 		private bool IsPlayerInRange()
 		{
@@ -163,6 +197,24 @@ namespace Game
 			}
 
 			_AttackTarget = null;
+			return false;
+		}
+
+		private bool IsTargetInAttackRange()
+		{
+			if (_AttackTarget)
+			{
+				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.AttackRange;
+			}
+			return false;
+		}
+
+		private bool IsTargetInSkillRange()
+		{
+			if (_AttackTarget)
+			{
+				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.SkillRange;
+			}
 			return false;
 		}
 

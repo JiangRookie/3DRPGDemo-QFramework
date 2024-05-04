@@ -58,7 +58,7 @@ namespace Game
 
 			transform.LookAt(_AttackTarget.transform);
 
-			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > 1)
+			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > SelfCharacterData.AttackRange)
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
 				yield return null;

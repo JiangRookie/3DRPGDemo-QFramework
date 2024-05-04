@@ -6170,7 +6170,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 984679953}
-  m_LocalRotation: {x: -0.0000000033423069, y: 0.98095244, z: -0.19424808, w: -0.000000016878642}
+  m_LocalRotation: {x: 0.0000000033423069, y: 0.98095244, z: -0.19424808, w: 0.000000016878642}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -11256,7 +11256,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948767722}
-  m_LocalRotation: {x: -0.0000000068471717, y: 0.973249, z: -0.22975294, w: -0.000000029005083}
+  m_LocalRotation: {x: -5.0309986e-23, y: 0.973249, z: -0.22975291, w: 1.7763568e-15}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -14291,6 +14291,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterBaseData: {fileID: 11400000, guid: d55da5cda34ff694c898e84d15c69f25, type: 2}
+  CharacterAttackData: {fileID: 11400000, guid: cd41877ad4f94ca4ab2e844f589476ca, type: 2}
+  IsCritical: 0
 --- !u!1 &2066896391098508031
 GameObject:
   m_ObjectHideFlags: 0
@@ -15200,6 +15202,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterBaseData: {fileID: 11400000, guid: 2f4d6125bd7c9654fa5ca6c46020cd97, type: 2}
+  CharacterAttackData: {fileID: 11400000, guid: 327be388df325ae4781b02be9598c02d, type: 2}
+  IsCritical: 0
 --- !u!1 &7446019048431048860
 GameObject:
   m_ObjectHideFlags: 0
