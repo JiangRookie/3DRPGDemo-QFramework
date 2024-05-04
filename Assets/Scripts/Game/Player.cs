@@ -12,6 +12,7 @@ namespace Game
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
+		private static readonly int s_Critical = Animator.StringToHash("Critical");
 
 		private void Start()
 		{
@@ -48,6 +49,7 @@ namespace Game
 			if (targetGameObj)
 			{
 				_AttackTarget = targetGameObj;
+				SelfCharacterData.IsCritical = Random.value < SelfCharacterData.CriticalHitRate;
 				StartCoroutine(MoveToAttackTargetCoroutine());
 			}
 		}
@@ -68,8 +70,17 @@ namespace Game
 
 			if (_AttackCooldown < 0)
 			{
+				SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
 				SelfAnimator.SetTrigger(s_Attack);
-				_AttackCooldown = 0.5f;
+				_AttackCooldown = SelfCharacterData.CoolDown;
+			}
+		}
+
+		public void Hit()
+		{
+			if (_AttackTarget)
+			{
+				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>());
 			}
 		}
 	}

@@ -1,6 +1,8 @@
+using System;
 using QFramework;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 // 1.请在菜单 编辑器扩展/Namespace Settings 里设置命名空间
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
@@ -226,6 +228,14 @@ namespace Game
 			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
 				? hit.position
 				: this.Position();
+		}
+
+		public void Hit()
+		{
+			if (_AttackTarget)
+			{
+				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>());
+			}
 		}
 	}
 }
