@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using QFramework;
 using UnityEngine;
 using UnityEngine.AI;
@@ -25,8 +24,6 @@ namespace Game
 		private static readonly int s_Die = Animator.StringToHash("Die");
 		private static readonly int s_Win = Animator.StringToHash("Win");
 		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
-
-		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
 		[SerializeField] private float _LookAtTime;
@@ -34,6 +31,7 @@ namespace Game
 
 		private GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
+		private EnemyState _EnemyState;
 		private Vector3 _InitPosition;
 		private Quaternion _InitRotation;
 		private float _InitSpeed;
