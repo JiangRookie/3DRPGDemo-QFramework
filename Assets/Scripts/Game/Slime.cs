@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using QFramework;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,31 +19,40 @@ namespace Game
 		private static readonly int s_Skill = Animator.StringToHash("Skill");
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
 		private static readonly int s_Critical = Animator.StringToHash("Critical");
+		private static readonly int s_Die = Animator.StringToHash("Die");
+
 		[SerializeField] private EnemyState _EnemyState;
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
 		[SerializeField] private float _LookAtTime;
 		[SerializeField] private bool _IsGuard;
+
 		private GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
 		private Vector3 _InitPosition;
+		private Quaternion _InitRotation;
 		private float _InitSpeed;
 		private bool _IsChase;
+		private bool _IsDead;
 		private bool _IsFollow;
 		private bool _IsWalk;
 		private float _LastAttackTime;
 		private string[] _LayerNames = new[] { "Player" };
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
-
 		private Vector3 _WayPoint;
 
-		private void Start()
+		private void Awake()
 		{
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 			_InitSpeed = SelfNavMeshAgent.speed;
 			_InitPosition = this.Position();
+			_InitRotation = this.Rotation();
 			_RemainLookAtTime = _LookAtTime;
+		}
+
+		private void Start()
+		{
 			if (_IsGuard)
 			{
 				_EnemyState = EnemyState.GUARD;
@@ -57,16 +66,16 @@ namespace Game
 
 		private void Update()
 		{
+			_IsDead = SelfCharacterData.CurHealth <= 0;
+			_LastAttackTime -= Time.deltaTime;
 			SwitchStates();
 			SetAnimationState();
-			_LastAttackTime -= Time.deltaTime;
 		}
 
 		private void OnDrawGizmosSelected()
 		{
 			Gizmos.color = Color.red;
 			Gizmos.DrawWireSphere(this.Position(), _ViewRange);
-			Gizmos.DrawWireSphere(this.Position(), _PatrolRange);
 		}
 
 		private void SetAnimationState()
@@ -75,11 +84,16 @@ namespace Game
 			SelfAnimator.SetBool(s_Follow, _IsFollow);
 			SelfAnimator.SetBool(s_Chase, _IsChase);
 			SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
+			SelfAnimator.SetBool(s_Die, _IsDead);
 		}
 
 		private void SwitchStates()
 		{
-			if (IsPlayerInRange())
+			if (_IsDead)
+			{
+				_EnemyState = EnemyState.DEAD;
+			}
+			else if (IsPlayerInRange())
 			{
 				_EnemyState = EnemyState.CHASE;
 			}
@@ -101,9 +115,24 @@ namespace Game
 			}
 		}
 
-		public void Guard() { }
+		private void Guard()
+		{
+			_IsChase = false;
+			if (this.Position() != _InitPosition)
+			{
+				_IsWalk = true;
+				SelfNavMeshAgent.isStopped = false;
+				SelfNavMeshAgent.destination = _InitPosition;
 
-		public void Patrol()
+				if (Vector3.Distance(_InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
+				{
+					_IsWalk = false;
+					transform.rotation = Quaternion.Lerp(transform.rotation, _InitRotation, 0.01f);
+				}
+			}
+		}
+
+		private void Patrol()
 		{
 			_IsChase = false;
 			SelfNavMeshAgent.speed = _InitSpeed * 0.5f;
@@ -127,7 +156,7 @@ namespace Game
 			}
 		}
 
-		public void Chase()
+		private void Chase()
 		{
 			_IsWalk = false;
 			_IsChase = true;
@@ -163,7 +192,8 @@ namespace Game
 				if (_LastAttackTime < 0)
 				{
 					_LastAttackTime = SelfCharacterData.CoolDown;
-					SelfCharacterData.IsCritical = Random.value < SelfCharacterData.CriticalHitRate;
+					DamageCalculator.CalculateIsCritical(SelfCharacterData);
+					Debug.Log("Slime IsCritical: " + SelfCharacterData.IsCritical);
 
 					// 执行攻击
 					Attack();
@@ -171,7 +201,12 @@ namespace Game
 			}
 		}
 
-		public void Dead() { }
+		private void Dead()
+		{
+			SelfBoxCollider.enabled = false;
+			SelfNavMeshAgent.enabled = false;
+			Destroy(gameObject, 2f);
+		}
 
 		private void Attack()
 		{
@@ -184,6 +219,16 @@ namespace Game
 			{
 				SelfAnimator.SetTrigger(s_Skill);
 			}
+		}
+
+		private void GenerateRandomPatrolPoint()
+		{
+			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
+			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
+			var newPoint = new Vector3(_InitPosition.x + randomX, this.Position().y, _InitPosition.z + randomZ);
+			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
+				? hit.position
+				: this.Position();
 		}
 
 		private bool IsPlayerInRange()
@@ -220,22 +265,22 @@ namespace Game
 			return false;
 		}
 
-		private void GenerateRandomPatrolPoint()
-		{
-			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
-			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
-			var newPoint = new Vector3(_InitPosition.x + randomX, this.Position().y, _InitPosition.z + randomZ);
-			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
-				? hit.position
-				: this.Position();
-		}
-
+		// Animation Event
 		public void Hit()
 		{
 			if (_AttackTarget)
 			{
-				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>());
+				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>(), () =>
+				{
+					StartCoroutine(PlayGetHitAnimationWithDelay(_AttackTarget.GetComponent<Animator>(), "GetHit", 1f));
+				});
 			}
+		}
+
+		private IEnumerator PlayGetHitAnimationWithDelay(Animator animator, string triggerName, float delay)
+		{
+			yield return new WaitForSeconds(delay);
+			animator.SetTrigger(triggerName);
 		}
 	}
 }

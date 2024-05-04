@@ -1,4 +1,4 @@
-// Generate Id:0d500f5b-8b63-4f61-bdff-6b154a6dfcb4
+// Generate Id:c96abec9-f4a8-4535-b2a7-620635f94723
 using UnityEngine;
 
 // 1.请在菜单 编辑器扩展/Namespace Settings 里设置命名空间
@@ -13,6 +13,8 @@ namespace Game
 		public UnityEngine.Animator SelfAnimator;
 
 		public Game.CharacterData SelfCharacterData;
+
+		public UnityEngine.BoxCollider SelfBoxCollider;
 
 	}
 }

@@ -6170,7 +6170,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 984679953}
-  m_LocalRotation: {x: 0.0000000033423069, y: 0.98095244, z: -0.19424808, w: 0.000000016878642}
+  m_LocalRotation: {x: -0.0000000033423069, y: 0.98095244, z: -0.19424808, w: -0.000000016878642}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -10374,7 +10374,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779475760}
-  m_LocalRotation: {x: -0, y: 0.9772671, z: -0.212012, w: 1e-45}
+  m_LocalRotation: {x: -0, y: 0.9772671, z: -0.212012, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -11256,7 +11256,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948767722}
-  m_LocalRotation: {x: -5.0309986e-23, y: 0.973249, z: -0.22975291, w: 1.7763568e-15}
+  m_LocalRotation: {x: -0.0000000068471717, y: 0.973249, z: -0.22975294, w: -0.000000029005083}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -15099,9 +15099,9 @@ GameObject:
   - component: {fileID: 8035681660017185165}
   - component: {fileID: 7153141402791051688}
   - component: {fileID: 7153141402791051687}
+  - component: {fileID: 7153141402791051690}
   - component: {fileID: 7153141402791051686}
   - component: {fileID: 7153141402791051689}
-  - component: {fileID: 7153141402791051690}
   m_Layer: 7
   m_Name: Slime
   m_TagString: Enemy
@@ -15130,6 +15130,7 @@ MonoBehaviour:
   SelfNavMeshAgent: {fileID: 7153141402791051688}
   SelfAnimator: {fileID: 8035681660017185165}
   SelfCharacterData: {fileID: 7153141402791051690}
+  SelfBoxCollider: {fileID: 7153141402791051687}
   _EnemyState: 0
   _ViewRange: 6
   _PatrolRange: 8
@@ -15143,7 +15144,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7153141402791051685}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -15189,6 +15190,8 @@ MonoBehaviour:
     Object: {fileID: 8035681660017185165}
   - MemberName: SelfCharacterData
     Object: {fileID: 7153141402791051690}
+  - MemberName: SelfBoxCollider
+    Object: {fileID: 7153141402791051687}
 --- !u!114 &7153141402791051690
 MonoBehaviour:
   m_ObjectHideFlags: 0

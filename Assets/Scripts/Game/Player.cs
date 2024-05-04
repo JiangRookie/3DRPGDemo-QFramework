@@ -10,9 +10,11 @@ namespace Game
 	{
 		private static readonly int s_Speed = Animator.StringToHash("Speed");
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
+		private static readonly int s_Critical = Animator.StringToHash("Critical");
+		private static readonly int s_Die = Animator.StringToHash("Die");
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
-		private static readonly int s_Critical = Animator.StringToHash("Critical");
+		private bool _IsDead;
 
 		private void Start()
 		{
@@ -27,14 +29,15 @@ namespace Game
 
 		private void Update()
 		{
-			SwitchAnimation();
-
+			_IsDead = SelfCharacterData.CurHealth <= 0;
 			_AttackCooldown -= Time.deltaTime;
+			SwitchAnimation();
 		}
 
 		private void SwitchAnimation()
 		{
 			SelfAnimator.SetFloat(s_Speed, SelfNavMeshAgent.velocity.sqrMagnitude);
+			SelfAnimator.SetBool(s_Die, _IsDead);
 		}
 
 		private void MoveToTarget(Vector3 targetPoint)
@@ -49,7 +52,6 @@ namespace Game
 			if (targetGameObj)
 			{
 				_AttackTarget = targetGameObj;
-				SelfCharacterData.IsCritical = Random.value < SelfCharacterData.CriticalHitRate;
 				StartCoroutine(MoveToAttackTargetCoroutine());
 			}
 		}
@@ -70,6 +72,8 @@ namespace Game
 
 			if (_AttackCooldown < 0)
 			{
+				DamageCalculator.CalculateIsCritical(SelfCharacterData);
+				Debug.Log("Player IsCritical: " + SelfCharacterData.IsCritical);
 				SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
 				SelfAnimator.SetTrigger(s_Attack);
 				_AttackCooldown = SelfCharacterData.CoolDown;
@@ -80,8 +84,17 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>());
+				DamageCalculator.TakeDamage(SelfCharacterData, _AttackTarget.GetComponent<CharacterData>(), () =>
+				{
+					StartCoroutine(PlayGetHitAnimationWithDelay(_AttackTarget.GetComponent<Animator>(), "GetHit", 1f));
+				});
 			}
+		}
+
+		private IEnumerator PlayGetHitAnimationWithDelay(Animator animator, string triggerName, float delay)
+		{
+			yield return new WaitForSeconds(delay);
+			animator.SetTrigger(triggerName);
 		}
 	}
 }
