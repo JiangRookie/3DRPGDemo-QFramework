@@ -12,7 +12,9 @@ namespace Game
 	public enum EnemyState { Guard, Patrol, Chase, Dead }
 
 	[RequireComponent(typeof(NavMeshAgent))]
-	public partial class Slime : ViewController, IEndGameObserver, IGetHit
+	[RequireComponent(typeof(BoxCollider))]
+	[RequireComponent(typeof(CharacterData))]
+	public partial class BaseMonster : ViewController, IEndGameObserver, IGetHit
 	{
 		private static readonly int s_Walk = Animator.StringToHash("Walk");
 		private static readonly int s_Follow = Animator.StringToHash("Follow");
@@ -314,12 +316,6 @@ namespace Game
 			}
 			int realDamage = Mathf.Max((int)baseDamage - PlayerData.CurDefense.Value, 1);
 			PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - realDamage, 0);
-		}
-
-		private IEnumerator PlayGetHitAnimationWithDelay(Animator animator, string triggerName, float delay)
-		{
-			yield return new WaitForSeconds(delay);
-			animator.SetTrigger(triggerName);
 		}
 	}
 }
