@@ -27,7 +27,7 @@ namespace Game
 		[SerializeField] private float _LookAtTime;
 		[SerializeField] private bool _IsGuard;
 
-		private GameObject _AttackTarget;
+		protected GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
 		private EnemyState _EnemyState;
 		private float _LastAttackTime;
@@ -218,7 +218,9 @@ namespace Game
 		private void Dead()
 		{
 			SelfBoxCollider.enabled = false;
-			SelfNavMeshAgent.enabled = false;
+
+			// SelfNavMeshAgent.enabled = false;
+			SelfNavMeshAgent.radius = 0;
 			Destroy(gameObject, 2f);
 		}
 
@@ -287,7 +289,7 @@ namespace Game
 		// Animation Event
 		public void Hit()
 		{
-			if (_AttackTarget)
+			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
 			{
 				TakeDamage(SelfCharacterData, () =>
 				{
@@ -296,7 +298,7 @@ namespace Game
 			}
 		}
 
-		private void TakeDamage(CharacterData attacker, Action criticalAction)
+		protected void TakeDamage(CharacterData attacker, Action criticalAction)
 		{
 			float baseDamage = Random.Range(attacker.MinDamage, attacker.MaxDamage + 1);
 			if (attacker.IsCritical)
@@ -306,6 +308,16 @@ namespace Game
 			}
 			int realDamage = Mathf.Max((int)baseDamage - PlayerData.CurDefense.Value, 1);
 			PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - realDamage, 0);
+		}
+	}
+
+	public static class TransformExtensions
+	{
+		public static bool IsFacingTarget(this Transform self, Transform target, float dotThreshold = 0.5f)
+		{
+			Vector3 direction = (target.position - self.position).normalized;
+			float dot = Vector3.Dot(self.forward, direction);
+			return dot >= dotThreshold;
 		}
 	}
 }
