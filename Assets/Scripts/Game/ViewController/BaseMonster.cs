@@ -8,8 +8,6 @@ using Random = UnityEngine.Random;
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
-	public enum EnemyState { Guard, Patrol, Chase, Dead }
-
 	[RequireComponent(typeof(NavMeshAgent))]
 	[RequireComponent(typeof(BoxCollider))]
 	[RequireComponent(typeof(CharacterData))]
@@ -32,26 +30,20 @@ namespace Game
 		private GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
 		private EnemyState _EnemyState;
-		private Vector3 _InitPosition;
-		private Quaternion _InitRotation;
-		private float _InitSpeed;
-		private bool _IsChase;
-		private bool _IsDead;
-		private bool _IsFollow;
-		private bool _IsWalk;
 		private float _LastAttackTime;
 		private string[] _LayerNames = new[] { "Player" };
 		private bool _PlayerIsDead;
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
 		private Vector3 _WayPoint;
+		private MonsterState MonsterState { get; set; }
+		private PatrolPointGenerator PatrolPointGenerator { get; set; }
 
 		private void Awake()
 		{
+			MonsterState = new MonsterState(SelfNavMeshAgent.speed, this.Position(), this.Rotation());
+			PatrolPointGenerator = new PatrolPointGenerator(_PatrolRange, MonsterState.InitPosition);
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
-			_InitSpeed = SelfNavMeshAgent.speed;
-			_InitPosition = this.Position();
-			_InitRotation = this.Rotation();
 			_RemainLookAtTime = _LookAtTime;
 		}
 
@@ -64,7 +56,7 @@ namespace Game
 			else
 			{
 				_EnemyState = EnemyState.Patrol;
-				GenerateRandomPatrolPoint();
+				_WayPoint = PatrolPointGenerator.GeneratePatrolPoint();
 			}
 			GameManager.Instance.AddObserver(this);
 		}
@@ -73,7 +65,7 @@ namespace Game
 		{
 			if (SelfCharacterData.CurHealth <= 0)
 			{
-				_IsDead = true;
+				MonsterState.IsDead = true;
 			}
 			if (!_PlayerIsDead)
 			{
@@ -98,8 +90,8 @@ namespace Game
 		{
 			SelfAnimator.SetBool(s_Win, true);
 			_PlayerIsDead = true;
-			_IsChase = false;
-			_IsWalk = false;
+			MonsterState.IsChase = false;
+			MonsterState.IsWalk = false;
 			_AttackTarget = null;
 		}
 
@@ -110,16 +102,16 @@ namespace Game
 
 		private void SetAnimationState()
 		{
-			SelfAnimator.SetBool(s_Walk, _IsWalk);
-			SelfAnimator.SetBool(s_Follow, _IsFollow);
-			SelfAnimator.SetBool(s_Chase, _IsChase);
+			SelfAnimator.SetBool(s_Walk, MonsterState.IsWalk);
+			SelfAnimator.SetBool(s_Follow, MonsterState.IsFollow);
+			SelfAnimator.SetBool(s_Chase, MonsterState.IsChase);
 			SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
-			SelfAnimator.SetBool(s_Die, _IsDead);
+			SelfAnimator.SetBool(s_Die, MonsterState.IsDead);
 		}
 
 		private void SwitchStates()
 		{
-			if (_IsDead)
+			if (MonsterState.IsDead)
 			{
 				_EnemyState = EnemyState.Dead;
 			}
@@ -147,28 +139,28 @@ namespace Game
 
 		private void Guard()
 		{
-			_IsChase = false;
-			if (this.Position() != _InitPosition)
+			MonsterState.IsChase = false;
+			if (this.Position() != MonsterState.InitPosition)
 			{
-				_IsWalk = true;
+				MonsterState.IsWalk = true;
 				SelfNavMeshAgent.isStopped = false;
-				SelfNavMeshAgent.destination = _InitPosition;
+				SelfNavMeshAgent.destination = MonsterState.InitPosition;
 
-				if (Vector3.Distance(_InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
+				if (Vector3.Distance(MonsterState.InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
 				{
-					_IsWalk = false;
-					transform.rotation = Quaternion.Lerp(transform.rotation, _InitRotation, 0.01f);
+					MonsterState.IsWalk = false;
+					transform.rotation = Quaternion.Lerp(transform.rotation, MonsterState.InitRotation, 0.01f);
 				}
 			}
 		}
 
 		private void Patrol()
 		{
-			_IsChase = false;
-			SelfNavMeshAgent.speed = _InitSpeed * 0.5f;
+			MonsterState.IsChase = false;
+			SelfNavMeshAgent.speed = MonsterState.InitSpeed * 0.5f;
 			if (Vector3.Distance(this.Position(), _WayPoint) <= SelfNavMeshAgent.stoppingDistance)
 			{
-				_IsWalk = false;
+				MonsterState.IsWalk = false;
 				if (_RemainLookAtTime > 0)
 				{
 					_RemainLookAtTime -= Time.deltaTime;
@@ -176,24 +168,24 @@ namespace Game
 				else
 				{
 					_RemainLookAtTime = _LookAtTime;
-					GenerateRandomPatrolPoint();
+					_WayPoint = PatrolPointGenerator.GeneratePatrolPoint();
 				}
 			}
 			else
 			{
-				_IsWalk = true;
+				MonsterState.IsWalk = true;
 				SelfNavMeshAgent.destination = _WayPoint;
 			}
 		}
 
 		private void Chase()
 		{
-			_IsWalk = false;
-			_IsChase = true;
-			SelfNavMeshAgent.speed = _InitSpeed;
+			MonsterState.IsWalk = false;
+			MonsterState.IsChase = true;
+			SelfNavMeshAgent.speed = MonsterState.InitSpeed;
 			if (!IsPlayerInRange())
 			{
-				_IsFollow = false;
+				MonsterState.IsFollow = false;
 				if (_RemainLookAtTime > 0)
 				{
 					SelfNavMeshAgent.destination = this.Position();
@@ -211,13 +203,13 @@ namespace Game
 			else
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
-				_IsFollow = true;
+				MonsterState.IsFollow = true;
 				SelfNavMeshAgent.isStopped = false;
 			}
 
 			if (IsTargetInAttackRange() || IsTargetInSkillRange())
 			{
-				_IsFollow = false;
+				MonsterState.IsFollow = false;
 				SelfNavMeshAgent.isStopped = true;
 				AttackTarget();
 			}
@@ -252,7 +244,7 @@ namespace Game
 		{
 			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
 			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
-			var newPoint = new Vector3(_InitPosition.x + randomX, this.Position().y, _InitPosition.z + randomZ);
+			var newPoint = new Vector3(MonsterState.InitPosition.x + randomX, this.Position().y, MonsterState.InitPosition.z + randomZ);
 			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
 				? hit.position
 				: this.Position();
