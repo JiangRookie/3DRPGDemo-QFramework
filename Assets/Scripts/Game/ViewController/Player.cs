@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
-	public partial class Player : ViewController, IGetHit
+	public partial class Player : ViewController, IGetHit, IPushable
 	{
 		private static readonly int s_Speed = Animator.StringToHash("Speed");
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
@@ -18,6 +18,7 @@ namespace Game
 		private GameObject _AttackTarget;
 		private bool _IsDead;
 		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
+		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
 
 		private void Start()
 		{
@@ -119,6 +120,13 @@ namespace Game
 			}
 			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
 			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
+		}
+
+		public void GetPushed(Vector3 pushedToPosition)
+		{
+			SelfNavMeshAgent.isStopped = true;
+			SelfNavMeshAgent.velocity = pushedToPosition;
+			SelfAnimator.SetTrigger(s_Dizzy);
 		}
 	}
 }

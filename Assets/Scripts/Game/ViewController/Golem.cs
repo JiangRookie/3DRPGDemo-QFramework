@@ -2,27 +2,20 @@
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 using QFramework;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Game
 {
 	public partial class Golem : BaseMonster
 	{
-		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
 		[SerializeField] private float _PushingForce = 30f;
 
 		public void Push()
 		{
 			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
 			{
-				Vector3 direction = (_AttackTarget.Position() - this.Position()).normalized;
-				_AttackTarget.GetComponent<NavMeshAgent>().isStopped = true;
-				_AttackTarget.GetComponent<NavMeshAgent>().velocity = direction * _PushingForce;
-				_AttackTarget.GetComponent<Animator>().SetTrigger(s_Dizzy);
-				TakeDamage(SelfCharacterData, () =>
-				{
-					_AttackTarget.GetComponent<IGetHit>().GetHit();
-				});
+				var direction = (_AttackTarget.Position() - this.Position()).normalized;
+				_AttackTarget.GetComponent<IPushable>().GetPushed(direction * _PushingForce);
+				TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
 			}
 		}
 	}

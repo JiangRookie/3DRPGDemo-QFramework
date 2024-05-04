@@ -2,7 +2,6 @@
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 using QFramework;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Game
 {
@@ -17,9 +16,7 @@ namespace Game
 			{
 				transform.LookAt(_AttackTarget.transform);
 				var direction = (_AttackTarget.Position() - this.Position()).normalized;
-				_AttackTarget.GetComponent<NavMeshAgent>().isStopped = true;
-				_AttackTarget.GetComponent<NavMeshAgent>().velocity = direction * _PushingForce;
-				_AttackTarget.GetComponent<Animator>().SetTrigger(s_Dizzy);
+				_AttackTarget.GetComponent<IPushable>().GetPushed(direction * _PushingForce);
 			}
 		}
 	}
