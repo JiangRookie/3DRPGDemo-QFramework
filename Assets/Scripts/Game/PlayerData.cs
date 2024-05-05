@@ -1,4 +1,7 @@
-﻿using QFramework;
+﻿using System;
+using QFramework;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Game
 {
@@ -16,5 +19,31 @@ namespace Game
 		public static BindableProperty<float> CriticalHitBonusPercentage = new BindableProperty<float>(2f);
 		public static BindableProperty<float> CriticalHitRate = new BindableProperty<float>(0.2f);
 		public static BindableProperty<bool> IsCritical = new BindableProperty<bool>(false);
+
+		public static void TakeDamage(CharacterData target, Action criticalAction = null)
+		{
+			float baseDamage = Random.Range(MinDamage.Value, MaxDamage.Value + 1);
+			if (IsCritical.Value)
+			{
+				baseDamage *= CriticalHitBonusPercentage.Value;
+				criticalAction?.Invoke();
+			}
+			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
+			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
+			target.OnHealthChanged.Trigger(target.CurHealth, target.MaxHealth);
+		}
+
+		public static void TakeDamage(int damage, CharacterData target, Action criticalAction = null)
+		{
+			int realDamage = Mathf.Max(damage - target.CurDefense, 1);
+			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
+			target.OnHealthChanged.Trigger(target.CurHealth, target.MaxHealth);
+		}
+
+		public static void TakeHurt(int damage)
+		{
+			int realDamage = Mathf.Max(damage - CurDefense.Value, 1);
+			CurHealth.Value = Mathf.Max(CurHealth.Value - realDamage, 0);
+		}
 	}
 }

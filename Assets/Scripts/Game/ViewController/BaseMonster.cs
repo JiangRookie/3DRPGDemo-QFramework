@@ -280,8 +280,7 @@ namespace Game
 				baseDamage *= attacker.CriticalHitBonusPercentage;
 				criticalAction?.Invoke();
 			}
-			int realDamage = Mathf.Max((int)baseDamage - PlayerData.CurDefense.Value, 1);
-			PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - realDamage, 0);
+			PlayerData.TakeHurt((int)baseDamage);
 		}
 	}
 }

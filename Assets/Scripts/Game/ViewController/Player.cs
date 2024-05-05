@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using QFramework;
 using UnityEngine;
@@ -16,8 +15,6 @@ namespace Game
 		private static readonly int s_Die = Animator.StringToHash("Die");
 		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
 		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
-
-		public static EasyEvent<Vector3> OnHitRock = new EasyEvent<Vector3>();
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
 		private bool _IsDead;
@@ -125,29 +122,18 @@ namespace Game
 					var rock = _AttackTarget.GetComponent<Rock>();
 					if (rock && rock.RockState == RockState.HitNothing)
 					{
-						OnHitRock.Trigger(transform.forward);
+						rock.HandleHit(transform.forward);
 					}
 				}
-				else
+				else if (_AttackTarget.CompareTag("Enemy"))
 				{
-					TakeDamage(_AttackTarget.GetComponent<CharacterData>(), () =>
-					{
-						_AttackTarget.GetComponent<IGetHit>().GetHit();
-					});
+					PlayerData.TakeDamage(_AttackTarget.GetComponent<CharacterData>(),
+						() =>
+						{
+							_AttackTarget.GetComponent<IGetHit>().GetHit();
+						});
 				}
 			}
-		}
-
-		private void TakeDamage(CharacterData target, Action criticalAction)
-		{
-			float baseDamage = Random.Range(PlayerData.MinDamage.Value, PlayerData.MaxDamage.Value + 1);
-			if (PlayerData.IsCritical.Value)
-			{
-				baseDamage *= PlayerData.CriticalHitBonusPercentage.Value;
-				criticalAction?.Invoke();
-			}
-			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
-			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
 		}
 	}
 }

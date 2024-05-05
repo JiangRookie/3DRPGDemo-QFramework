@@ -7,7 +7,6 @@ namespace Game
 {
 	public partial class Golem : BaseMonster
 	{
-		public static EasyEvent<GameObject> OnRockThrow = new EasyEvent<GameObject>();
 		[SerializeField] private float _PushingForce = 30f;
 
 		public void Push()
@@ -27,8 +26,9 @@ namespace Game
 			{
 				Rock.Instantiate()
 				   .Position(RightHandPos.Position())
-				   .RotationIdentity();
-				OnRockThrow.Trigger(_AttackTarget);
+				   .RotationIdentity()
+				   .GetComponent<Rock>()
+				   .SetAttackTarget(_AttackTarget);
 			}
 		}
 	}

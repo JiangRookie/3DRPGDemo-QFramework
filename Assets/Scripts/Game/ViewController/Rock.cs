@@ -20,19 +20,6 @@ namespace Game
 			SelfRigidbody.velocity = Vector3.one;
 			RockState = RockState.HitPlayer;
 			FlyToTarget();
-
-			Golem.OnRockThrow
-			   .Register(target => _Target = target)
-			   .UnRegisterWhenGameObjectDestroyed(gameObject);
-
-			Player.OnHitRock
-			   .Register(direction =>
-				{
-					RockState = RockState.HitEnemy;
-					SelfRigidbody.velocity = Vector3.one;
-					SelfRigidbody.AddForce(direction * 20, ForceMode.Impulse);
-				})
-			   .UnRegisterWhenGameObjectDestroyed(gameObject);
 		}
 
 		private void FixedUpdate()
@@ -50,37 +37,50 @@ namespace Game
 				case RockState.HitPlayer:
 					if (other.gameObject.CompareTag("Player"))
 					{
-						other.gameObject.GetComponent<IPushable>().SetPushed(_Direction * _Force);
-						int damage = Mathf.Max(_Damage - PlayerData.CurDefense.Value, 0);
-						PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - damage, 0);
+						other.gameObject
+						   .GetComponent<IPushable>()
+						   .SetPushed(_Direction * _Force);
+						PlayerData.TakeHurt(_Damage);
 						RockState = RockState.HitNothing;
 					}
 					break;
 				case RockState.HitEnemy:
-
 					var golem = other.gameObject.GetComponent<Golem>();
 					if (golem)
 					{
-						int damage = Mathf.Max(_Damage - golem.SelfCharacterData.CurDefense, 0);
-						golem.SelfCharacterData.CurHealth = Mathf.Max(golem.SelfCharacterData.CurHealth - damage, 0);
-						RockBreakEffect.Instantiate()
+						PlayerData.TakeDamage(_Damage, golem.SelfCharacterData);
+
+						RockBreakEffect
+						   .Instantiate()
 						   .Position(this.Position())
-						   .RotationIdentity();
-						Destroy(gameObject);
+						   .RotationIdentity()
+						   .DestroySelf();
 					}
 					break;
 				case RockState.HitNothing: break;
 			}
 		}
 
+		public void HandleHit(Vector3 direction)
+		{
+			RockState = RockState.HitEnemy;
+			SelfRigidbody.velocity = Vector3.one;
+			SelfRigidbody.AddForce(direction * 20, ForceMode.Impulse);
+		}
+
 		private void FlyToTarget()
 		{
 			if (!_Target)
 			{
-				_Target = FindObjectOfType<Player>().gameObject;
+				_Target = FindObjectOfType<Player>().gameObject; // TODO: 后续修改获取 Player 的方法
 			}
 			_Direction = (_Target.Position() - this.Position() + Vector3.up).normalized;
 			SelfRigidbody.AddForce(_Direction * _Force, ForceMode.Impulse);
+		}
+
+		public void SetAttackTarget(GameObject attackTarget)
+		{
+			_Target = attackTarget;
 		}
 	}
 }

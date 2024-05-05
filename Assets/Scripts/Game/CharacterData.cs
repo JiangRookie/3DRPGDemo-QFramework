@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using QFramework;
+using UnityEngine;
 
 namespace Game
 {
@@ -7,6 +8,7 @@ namespace Game
 		public CharacterCommonData_SO CharacterBaseData;
 		public CharacterCommonData_SO TemplateData;
 		public AttackData_SO CharacterAttackData;
+		public EasyEvent<int, int> OnHealthChanged = new EasyEvent<int, int>();
 		public bool IsCritical { get; set; }
 
 		#region CharacterBaseData

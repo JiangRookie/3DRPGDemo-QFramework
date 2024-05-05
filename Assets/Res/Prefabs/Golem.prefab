@@ -707,6 +707,7 @@ GameObject:
   - component: {fileID: 2100851940229327038}
   - component: {fileID: 2100851940229327037}
   - component: {fileID: 6406149498417931201}
+  - component: {fileID: 995357576}
   m_Layer: 7
   m_Name: Golem
   m_TagString: Enemy
@@ -721,12 +722,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2100851940229327027}
-  m_LocalRotation: {x: -0, y: 0.2543103, z: -0, w: 0.96712273}
+  m_LocalRotation: {x: 0, y: 0.25430652, z: 0, w: 0.9671236}
   m_LocalPosition: {x: -17.388763, y: 0.32362747, z: -15.232815}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2100851938402574052}
   - {fileID: 2100851939907485636}
+  - {fileID: 6050039532499501586}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 29.465, z: 0}
@@ -845,6 +847,30 @@ MonoBehaviour:
     Object: {fileID: 3622201219443111730, guid: 405a8210e2f7d7a4dbd4fe2cfb7c88b7, type: 3}
   - MemberName: RightHandPos
     Object: {fileID: 2100851939973127120}
+--- !u!114 &995357576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100851940229327027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c57ef248f4b0940a796f1681562f4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Namespace: QFramework.Example
+  ScriptName: Golem
+  ScriptsFolder: Assets\Scripts\Game\ViewController
+  GeneratePrefab: 0
+  PrefabFolder: Assets/Art/Prefab
+  ArchitectureFullTypeName: 
+  HealthBarPrefab: {fileID: 5706894216726464733, guid: fa4cba5939d8d514882b756d5494f6c0, type: 3}
+  HealthBarPointTransform: {fileID: 6050039532499501586}
+  SelfCharacterData: {fileID: 2100851940229327038}
+  _AlwaysVisible: 1
+  _VisibleTime: 0
+  _TimeLeft: 0
 --- !u!1 &2100851940372679160
 GameObject:
   m_ObjectHideFlags: 0
@@ -874,4 +900,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2100851939846477238}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6070535866239802765
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6050039532499501586}
+  m_Layer: 7
+  m_Name: HealthBarPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6050039532499501586
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6070535866239802765}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2100851940229327025}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
