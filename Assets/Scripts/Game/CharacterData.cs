@@ -124,6 +124,15 @@ namespace Game
 			}
 		}
 
+		public int Exp
+		{
+			get => CharacterBaseData ? CharacterBaseData.Exp : 0;
+			set
+			{
+				if (CharacterBaseData) CharacterBaseData.Exp = value;
+			}
+		}
+
 		#endregion
 	}
 }

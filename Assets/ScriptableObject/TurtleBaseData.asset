@@ -16,3 +16,4 @@ MonoBehaviour:
   CurHealth: 50
   BaseDefense: 4
   CurDefense: 4
+  Exp: 25

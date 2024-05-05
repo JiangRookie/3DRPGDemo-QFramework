@@ -9,5 +9,6 @@ namespace Game
 		public int CurHealth;
 		public int BaseDefense;
 		public int CurDefense;
+		public int Exp;
 	}
 }

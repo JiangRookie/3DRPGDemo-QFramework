@@ -11,9 +11,9 @@ namespace Game.UI
 		[SerializeField] private bool _AlwaysVisible;
 		[SerializeField] private float _HealthBarDisplayDuration;
 		[SerializeField] private float _RemainingHealthBarDisplayTime = 3f;
-		private Transform _MainCameraTransform;
-		private Transform _HealthBarUITransform;
 		private Image _HealthBarImage;
+		private Transform _HealthBarUITransform;
+		private Transform _MainCameraTransform;
 
 		private void Start()
 		{
@@ -31,22 +31,6 @@ namespace Game.UI
 				}).UnRegisterWhenGameObjectDestroyed(gameObject);
 		}
 
-		private void OnEnable()
-		{
-			_MainCameraTransform = Camera.main.transform;
-			foreach (var canvas in FindObjectsOfType<Canvas>())
-			{
-				if (canvas.renderMode == RenderMode.WorldSpace)
-				{
-					_HealthBarUITransform = HealthBarPrefab
-					   .Instantiate()
-					   .Parent(canvas.transform).transform;
-					_HealthBarImage = _HealthBarUITransform.GetChild(0).GetComponent<Image>();
-					_HealthBarUITransform.gameObject.SetActive(_AlwaysVisible);
-				}
-			}
-		}
-
 		private void LateUpdate()
 		{
 			if (_HealthBarUITransform)
@@ -60,6 +44,22 @@ namespace Game.UI
 				else
 				{
 					_RemainingHealthBarDisplayTime -= Time.deltaTime;
+				}
+			}
+		}
+
+		private void OnEnable()
+		{
+			_MainCameraTransform = Camera.main.transform;
+			foreach (var canvas in FindObjectsOfType<Canvas>())
+			{
+				if (canvas.renderMode == RenderMode.WorldSpace)
+				{
+					_HealthBarUITransform = HealthBarPrefab
+					   .Instantiate()
+					   .Parent(canvas.transform).transform;
+					_HealthBarImage = _HealthBarUITransform.GetChild(0).GetComponent<Image>();
+					_HealthBarUITransform.gameObject.SetActive(_AlwaysVisible);
 				}
 			}
 		}
