@@ -14,11 +14,19 @@ namespace Game
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
 		private static readonly int s_Critical = Animator.StringToHash("Critical");
 		private static readonly int s_Die = Animator.StringToHash("Die");
+		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
+		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
+
+		public static EasyEvent<Vector3> OnHitRock = new EasyEvent<Vector3>();
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
 		private bool _IsDead;
-		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
-		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
+		private float _StopDistance;
+
+		private void Awake()
+		{
+			_StopDistance = SelfNavMeshAgent.stoppingDistance;
+		}
 
 		private void Start()
 		{
@@ -42,6 +50,18 @@ namespace Game
 			SwitchAnimation();
 		}
 
+		public void GetHit()
+		{
+			SelfAnimator.SetTrigger(s_GetHit);
+		}
+
+		public void SetPushed(Vector3 pushedToPosition)
+		{
+			SelfNavMeshAgent.isStopped = true;
+			SelfNavMeshAgent.velocity = pushedToPosition;
+			SelfAnimator.SetTrigger(s_Dizzy);
+		}
+
 		private void SwitchAnimation()
 		{
 			SelfAnimator.SetFloat(s_Speed, SelfNavMeshAgent.velocity.sqrMagnitude);
@@ -52,6 +72,7 @@ namespace Game
 		{
 			StopAllCoroutines();
 			if (_IsDead) return;
+			SelfNavMeshAgent.stoppingDistance = _StopDistance;
 			SelfNavMeshAgent.isStopped = false;
 			SelfNavMeshAgent.destination = targetPoint;
 		}
@@ -69,10 +90,11 @@ namespace Game
 		private IEnumerator MoveToAttackTargetCoroutine()
 		{
 			SelfNavMeshAgent.isStopped = false;
+			SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value;
 
 			transform.LookAt(_AttackTarget.transform);
 
-			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > PlayerData.AttackRange.Value + +SelfNavMeshAgent.stoppingDistance)
+			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > PlayerData.AttackRange.Value)
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
 				yield return null;
@@ -98,16 +120,22 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				TakeDamage(_AttackTarget.GetComponent<CharacterData>(), () =>
+				if (_AttackTarget.CompareTag("Attackable"))
 				{
-					_AttackTarget.GetComponent<IGetHit>().GetHit();
-				});
+					var rock = _AttackTarget.GetComponent<Rock>();
+					if (rock && rock.RockState == RockState.HitNothing)
+					{
+						OnHitRock.Trigger(transform.forward);
+					}
+				}
+				else
+				{
+					TakeDamage(_AttackTarget.GetComponent<CharacterData>(), () =>
+					{
+						_AttackTarget.GetComponent<IGetHit>().GetHit();
+					});
+				}
 			}
-		}
-
-		public void GetHit()
-		{
-			SelfAnimator.SetTrigger(s_GetHit);
 		}
 
 		private void TakeDamage(CharacterData target, Action criticalAction)
@@ -120,13 +148,6 @@ namespace Game
 			}
 			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
 			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
-		}
-
-		public void GetPushed(Vector3 pushedToPosition)
-		{
-			SelfNavMeshAgent.isStopped = true;
-			SelfNavMeshAgent.velocity = pushedToPosition;
-			SelfAnimator.SetTrigger(s_Dizzy);
 		}
 	}
 }

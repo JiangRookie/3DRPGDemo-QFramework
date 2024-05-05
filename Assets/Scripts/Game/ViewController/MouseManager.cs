@@ -46,7 +46,8 @@ namespace Game
 					OnMouseClicked.Trigger(hitInfo.point);
 				}
 
-				if (hitInfo.collider.gameObject.CompareTag("Enemy"))
+				if (hitInfo.collider.gameObject.CompareTag("Enemy") ||
+					hitInfo.collider.gameObject.CompareTag("Attackable"))
 				{
 					OnEnemyClicked.Trigger(hitInfo.collider.gameObject);
 				}

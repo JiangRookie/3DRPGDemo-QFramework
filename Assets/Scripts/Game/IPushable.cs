@@ -4,6 +4,6 @@ namespace Game
 {
 	public interface IPushable
 	{
-		void GetPushed(Vector3 pushedToPosition);
+		void SetPushed(Vector3 pushedToPosition);
 	}
 }

@@ -14,7 +14,7 @@ namespace Game
 			if (_AttackTarget)
 			{
 				transform.LookAt(_AttackTarget.transform);
-				_AttackTarget.GetComponent<IPushable>().GetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
+				_AttackTarget.GetComponent<IPushable>().SetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
 			}
 		}
 	}

@@ -7,14 +7,28 @@ namespace Game
 {
 	public partial class Golem : BaseMonster
 	{
+		public static EasyEvent<GameObject> OnRockThrow = new EasyEvent<GameObject>();
 		[SerializeField] private float _PushingForce = 30f;
 
 		public void Push()
 		{
 			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
 			{
-				_AttackTarget.GetComponent<IPushable>().GetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
+				_AttackTarget.GetComponent<IPushable>()
+				   .SetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
 				TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
+			}
+		}
+
+		// Animation Event
+		public void ThrowRock()
+		{
+			if (_AttackTarget)
+			{
+				Rock.Instantiate()
+				   .Position(RightHandPos.Position())
+				   .RotationIdentity();
+				OnRockThrow.Trigger(_AttackTarget);
 			}
 		}
 	}
