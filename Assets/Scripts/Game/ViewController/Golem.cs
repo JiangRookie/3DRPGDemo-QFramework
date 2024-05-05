@@ -13,8 +13,7 @@ namespace Game
 		{
 			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
 			{
-				var direction = (_AttackTarget.Position() - this.Position()).normalized;
-				_AttackTarget.GetComponent<IPushable>().GetPushed(direction * _PushingForce);
+				_AttackTarget.GetComponent<IPushable>().GetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
 				TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
 			}
 		}

@@ -13,24 +13,16 @@ namespace Game
 	[RequireComponent(typeof(CharacterData))]
 	public partial class BaseMonster : ViewController, IEndGameObserver, IGetHit
 	{
-		private static readonly int s_Walk = Animator.StringToHash("Walk");
-		private static readonly int s_Follow = Animator.StringToHash("Follow");
-		private static readonly int s_Chase = Animator.StringToHash("Chase");
 		private static readonly int s_Skill = Animator.StringToHash("Skill");
 		private static readonly int s_Attack = Animator.StringToHash("Attack");
-		private static readonly int s_Critical = Animator.StringToHash("Critical");
-		private static readonly int s_Die = Animator.StringToHash("Die");
-		private static readonly int s_Win = Animator.StringToHash("Win");
-		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
 		[SerializeField] private float _LookAtTime;
 		[SerializeField] private bool _IsGuard;
-
+		private float _AttackCooldown;
 		protected GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
 		private EnemyState _EnemyState;
-		private float _LastAttackTime;
 		private string[] _LayerNames = new[] { "Player" };
 		private bool _PlayerIsDead;
 		private int _PlayerLayerMask;
@@ -41,7 +33,11 @@ namespace Game
 
 		private void Awake()
 		{
-			MonsterState = new MonsterState(SelfNavMeshAgent.speed, this.Position(), this.Rotation());
+			MonsterState = new MonsterState(
+				SelfNavMeshAgent.speed,
+				this.Position(),
+				this.Rotation(),
+				SelfCharacterData);
 			PatrolPointGenerator = new PatrolPointGenerator(_PatrolRange, MonsterState.InitPosition);
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 			_RemainLookAtTime = _LookAtTime;
@@ -69,7 +65,7 @@ namespace Game
 			}
 			if (!_PlayerIsDead)
 			{
-				_LastAttackTime -= Time.deltaTime;
+				_AttackCooldown -= Time.deltaTime;
 				SwitchStates();
 				SetAnimationState();
 			}
@@ -88,26 +84,14 @@ namespace Game
 
 		public void EndNotify()
 		{
-			SelfAnimator.SetBool(s_Win, true);
 			_PlayerIsDead = true;
-			MonsterState.IsChase = false;
-			MonsterState.IsWalk = false;
 			_AttackTarget = null;
+			MonsterState.SetWinState(SelfAnimator);
 		}
 
-		public void GetHit()
-		{
-			SelfAnimator.SetTrigger(s_GetHit);
-		}
+		public void GetHit() => MonsterState.SetGetHitState(SelfAnimator);
 
-		private void SetAnimationState()
-		{
-			SelfAnimator.SetBool(s_Walk, MonsterState.IsWalk);
-			SelfAnimator.SetBool(s_Follow, MonsterState.IsFollow);
-			SelfAnimator.SetBool(s_Chase, MonsterState.IsChase);
-			SelfAnimator.SetBool(s_Critical, SelfCharacterData.IsCritical);
-			SelfAnimator.SetBool(s_Die, MonsterState.IsDead);
-		}
+		private void SetAnimationState() => MonsterState.SetAnimationState(SelfAnimator);
 
 		private void SwitchStates()
 		{
@@ -207,49 +191,39 @@ namespace Game
 				SelfNavMeshAgent.isStopped = false;
 			}
 
-			if (IsTargetInAttackRange() || IsTargetInSkillRange())
+			bool isTargetInAttackRange = IsTargetInAttackRange();
+			bool isTargetInSkillRange = IsTargetInSkillRange();
+			if (isTargetInAttackRange || isTargetInSkillRange)
 			{
 				MonsterState.IsFollow = false;
 				SelfNavMeshAgent.isStopped = true;
-				AttackTarget();
+				AttackTarget(isTargetInAttackRange, isTargetInSkillRange);
 			}
 		}
 
 		private void Dead()
 		{
 			SelfBoxCollider.enabled = false;
-
-			// SelfNavMeshAgent.enabled = false;
 			SelfNavMeshAgent.radius = 0;
 			Destroy(gameObject, 2f);
 		}
 
-		private void AttackTarget()
+		private void AttackTarget(bool isTargetInAttackRange, bool isTargetInSkillRange)
 		{
-			if (_LastAttackTime < 0)
+			if (_AttackCooldown < 0)
 			{
-				_LastAttackTime = SelfCharacterData.CoolDown;
+				_AttackCooldown = SelfCharacterData.CoolDown;
 				SelfCharacterData.IsCritical = Random.value <= SelfCharacterData.CriticalHitRate;
 				transform.LookAt(_AttackTarget.transform);
-				if (IsTargetInAttackRange())
+				if (isTargetInAttackRange)
 				{
 					SelfAnimator.SetTrigger(s_Attack);
 				}
-				if (IsTargetInSkillRange())
+				if (isTargetInSkillRange)
 				{
 					SelfAnimator.SetTrigger(s_Skill);
 				}
 			}
-		}
-
-		private void GenerateRandomPatrolPoint()
-		{
-			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
-			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
-			var newPoint = new Vector3(MonsterState.InitPosition.x + randomX, this.Position().y, MonsterState.InitPosition.z + randomZ);
-			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
-				? hit.position
-				: this.Position();
 		}
 
 		private bool IsPlayerInRange()
@@ -298,7 +272,7 @@ namespace Game
 			}
 		}
 
-		protected void TakeDamage(CharacterData attacker, Action criticalAction)
+		protected void TakeDamage(CharacterData attacker, Action criticalAction = null)
 		{
 			float baseDamage = Random.Range(attacker.MinDamage, attacker.MaxDamage + 1);
 			if (attacker.IsCritical)
@@ -308,16 +282,6 @@ namespace Game
 			}
 			int realDamage = Mathf.Max((int)baseDamage - PlayerData.CurDefense.Value, 1);
 			PlayerData.CurHealth.Value = Mathf.Max(PlayerData.CurHealth.Value - realDamage, 0);
-		}
-	}
-
-	public static class TransformExtensions
-	{
-		public static bool IsFacingTarget(this Transform self, Transform target, float dotThreshold = 0.5f)
-		{
-			Vector3 direction = (target.position - self.position).normalized;
-			float dot = Vector3.Dot(self.forward, direction);
-			return dot >= dotThreshold;
 		}
 	}
 }
