@@ -76,6 +76,11 @@ namespace Game
 			GameManager.Instance.RemoveObserver(this);
 		}
 
+		private void OnApplicationQuit()
+		{
+			gameObject.Hide();
+		}
+
 		private void OnDrawGizmosSelected()
 		{
 			Gizmos.color = Color.red;
