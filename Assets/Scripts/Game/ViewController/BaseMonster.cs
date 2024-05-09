@@ -13,8 +13,6 @@ namespace Game
 	[RequireComponent(typeof(CharacterData))]
 	public partial class BaseMonster : ViewController, IEndGameObserver, IGetHit
 	{
-		private static readonly int s_Skill = Animator.StringToHash("Skill");
-		private static readonly int s_Attack = Animator.StringToHash("Attack");
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
 		[SerializeField] private float _LookAtTime;
@@ -22,52 +20,35 @@ namespace Game
 		private float _AttackCooldown;
 		protected GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
-		private EnemyState _EnemyState;
 		private string[] _LayerNames = new[] { "Player" };
 		private bool _PlayerIsDead;
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
-		private Vector3 _WayPoint;
 		private MonsterState MonsterState { get; set; }
-		private PatrolPointGenerator PatrolPointGenerator { get; set; }
+		private IPatrolPointGenerator PatrolPointGenerator { get; set; }
 
 		private void Awake()
 		{
-			MonsterState = new MonsterState(
-				SelfNavMeshAgent.speed,
-				this.Position(),
-				this.Rotation(),
-				SelfCharacterData);
-			PatrolPointGenerator = new PatrolPointGenerator(_PatrolRange, MonsterState.InitPosition);
+			MonsterState = new MonsterState(transform, SelfNavMeshAgent, SelfCharacterData);
+			PatrolPointGenerator = new DefaultPatrolPointGenerator(_PatrolRange, this.Position());
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 			_RemainLookAtTime = _LookAtTime;
 		}
 
 		private void Start()
 		{
-			if (_IsGuard)
-			{
-				_EnemyState = EnemyState.Guard;
-			}
-			else
-			{
-				_EnemyState = EnemyState.Patrol;
-				_WayPoint = PatrolPointGenerator.GeneratePatrolPoint();
-			}
+			MonsterState.SetInitialState(_IsGuard, PatrolPointGenerator);
 			GameManager.Instance.AddObserver(this);
 		}
 
 		private void Update()
 		{
-			if (SelfCharacterData.CurHealth <= 0)
-			{
-				MonsterState.IsDead = true;
-			}
+			MonsterState.CheckAndSetDeadState();
 			if (!_PlayerIsDead)
 			{
 				_AttackCooldown -= Time.deltaTime;
 				SwitchStates();
-				SetAnimationState();
+				MonsterState.SetAnimationState(SelfAnimator);
 			}
 		}
 
@@ -81,12 +62,6 @@ namespace Game
 			gameObject.Hide();
 		}
 
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.red;
-			Gizmos.DrawWireSphere(this.Position(), _ViewRange);
-		}
-
 		public void EndNotify()
 		{
 			_PlayerIsDead = true;
@@ -96,20 +71,18 @@ namespace Game
 
 		public void GetHit() => MonsterState.SetGetHitState(SelfAnimator);
 
-		private void SetAnimationState() => MonsterState.SetAnimationState(SelfAnimator);
-
 		private void SwitchStates()
 		{
 			if (MonsterState.IsDead)
 			{
-				_EnemyState = EnemyState.Dead;
+				MonsterState.State = EnemyState.Dead;
 			}
 			else if (IsPlayerInRange())
 			{
-				_EnemyState = EnemyState.Chase;
+				MonsterState.State = EnemyState.Chase;
 			}
 
-			switch (_EnemyState)
+			switch (MonsterState.State)
 			{
 				case EnemyState.Guard:
 					Guard();
@@ -147,7 +120,7 @@ namespace Game
 		{
 			MonsterState.IsChase = false;
 			SelfNavMeshAgent.speed = MonsterState.InitSpeed * 0.5f;
-			if (Vector3.Distance(this.Position(), _WayPoint) <= SelfNavMeshAgent.stoppingDistance)
+			if (Vector3.Distance(this.Position(), PatrolPointGenerator.WayPoint) <= SelfNavMeshAgent.stoppingDistance)
 			{
 				MonsterState.IsWalk = false;
 				if (_RemainLookAtTime > 0)
@@ -157,13 +130,13 @@ namespace Game
 				else
 				{
 					_RemainLookAtTime = _LookAtTime;
-					_WayPoint = PatrolPointGenerator.GeneratePatrolPoint();
+					PatrolPointGenerator.GeneratePatrolPoint();
 				}
 			}
 			else
 			{
 				MonsterState.IsWalk = true;
-				SelfNavMeshAgent.destination = _WayPoint;
+				SelfNavMeshAgent.destination = PatrolPointGenerator.WayPoint;
 			}
 		}
 
@@ -182,11 +155,11 @@ namespace Game
 				}
 				else if (_IsGuard)
 				{
-					_EnemyState = EnemyState.Guard;
+					MonsterState.State = EnemyState.Guard;
 				}
 				else
 				{
-					_EnemyState = EnemyState.Patrol;
+					MonsterState.State = EnemyState.Patrol;
 				}
 			}
 			else
@@ -222,11 +195,11 @@ namespace Game
 				transform.LookAt(_AttackTarget.transform);
 				if (isTargetInAttackRange)
 				{
-					SelfAnimator.SetTrigger(s_Attack);
+					SelfAnimator.SetTrigger(AnimatorHash.Attack);
 				}
 				if (isTargetInSkillRange)
 				{
-					SelfAnimator.SetTrigger(s_Skill);
+					SelfAnimator.SetTrigger(AnimatorHash.Skill);
 				}
 			}
 		}

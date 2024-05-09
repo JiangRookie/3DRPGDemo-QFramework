@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using QFramework;
+using UnityEngine;
+using UnityEngine.AI;
 
 namespace Game
 {
@@ -6,21 +8,15 @@ namespace Game
 
 	public class MonsterState
 	{
-		private static readonly int s_Walk = Animator.StringToHash("Walk");
-		private static readonly int s_Follow = Animator.StringToHash("Follow");
-		private static readonly int s_Chase = Animator.StringToHash("Chase");
-		private static readonly int s_Die = Animator.StringToHash("Die");
-		private static readonly int s_Critical = Animator.StringToHash("Critical");
-		private static readonly int s_Win = Animator.StringToHash("Win");
-		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
-
 		private CharacterData _SelfCharacterData;
+		private NavMeshAgent _SelfNavMeshAgent;
 
-		public MonsterState(float initSpeed, Vector3 initPosition, Quaternion initRotation, CharacterData characterData)
+		public MonsterState(Transform transform, NavMeshAgent agent, CharacterData characterData)
 		{
-			InitSpeed = initSpeed;
-			InitPosition = initPosition;
-			InitRotation = initRotation;
+			InitPosition = transform.Position();
+			InitRotation = transform.Rotation();
+			_SelfNavMeshAgent = agent;
+			InitSpeed = agent.speed;
 			_SelfCharacterData = characterData;
 		}
 
@@ -32,25 +28,48 @@ namespace Game
 		public bool IsFollow { get; set; }
 		public bool IsWalk { get; set; }
 
+		public EnemyState State { get; set; }
+
 		public void SetAnimationState(Animator selfAnimator)
 		{
-			selfAnimator.SetBool(s_Walk, IsWalk);
-			selfAnimator.SetBool(s_Follow, IsFollow);
-			selfAnimator.SetBool(s_Chase, IsChase);
-			selfAnimator.SetBool(s_Critical, _SelfCharacterData.IsCritical);
-			selfAnimator.SetBool(s_Die, IsDead);
+			selfAnimator.SetBool(AnimatorHash.Walk, IsWalk);
+			selfAnimator.SetBool(AnimatorHash.Follow, IsFollow);
+			selfAnimator.SetBool(AnimatorHash.Chase, IsChase);
+			selfAnimator.SetBool(AnimatorHash.Critical, _SelfCharacterData.IsCritical);
+			selfAnimator.SetBool(AnimatorHash.Die, IsDead);
 		}
 
 		public void SetWinState(Animator selfAnimator)
 		{
-			selfAnimator.SetBool(s_Win, true);
+			selfAnimator.SetBool(AnimatorHash.Win, true);
 			IsChase = false;
 			IsWalk = false;
 		}
 
 		public void SetGetHitState(Animator selfAnimator)
 		{
-			selfAnimator.SetTrigger(s_GetHit);
+			selfAnimator.SetTrigger(AnimatorHash.GetHit);
+		}
+
+		public void SetInitialState(bool isGuard, IPatrolPointGenerator patrolPointGenerator)
+		{
+			if (isGuard)
+			{
+				State = EnemyState.Guard;
+			}
+			else
+			{
+				State = EnemyState.Patrol;
+				patrolPointGenerator.GeneratePatrolPoint();
+			}
+		}
+
+		public void CheckAndSetDeadState()
+		{
+			if (_SelfCharacterData.CurHealth <= 0)
+			{
+				IsDead = true;
+			}
 		}
 	}
 }

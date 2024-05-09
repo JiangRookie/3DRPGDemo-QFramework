@@ -9,12 +9,6 @@ namespace Game
 {
 	public partial class Player : ViewController, IGetHit, IPushable
 	{
-		private static readonly int s_Speed = Animator.StringToHash("Speed");
-		private static readonly int s_Attack = Animator.StringToHash("Attack");
-		private static readonly int s_Critical = Animator.StringToHash("Critical");
-		private static readonly int s_Die = Animator.StringToHash("Die");
-		private static readonly int s_GetHit = Animator.StringToHash("GetHit");
-		private static readonly int s_Dizzy = Animator.StringToHash("Dizzy");
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
 		private bool _IsDead;
@@ -49,20 +43,20 @@ namespace Game
 
 		public void GetHit()
 		{
-			SelfAnimator.SetTrigger(s_GetHit);
+			SelfAnimator.SetTrigger(AnimatorHash.GetHit);
 		}
 
 		public void SetPushed(Vector3 pushedToPosition)
 		{
 			SelfNavMeshAgent.isStopped = true;
 			SelfNavMeshAgent.velocity = pushedToPosition;
-			SelfAnimator.SetTrigger(s_Dizzy);
+			SelfAnimator.SetTrigger(AnimatorHash.Dizzy);
 		}
 
 		private void SwitchAnimation()
 		{
-			SelfAnimator.SetFloat(s_Speed, SelfNavMeshAgent.velocity.sqrMagnitude);
-			SelfAnimator.SetBool(s_Die, _IsDead);
+			SelfAnimator.SetFloat(AnimatorHash.Speed, SelfNavMeshAgent.velocity.sqrMagnitude);
+			SelfAnimator.SetBool(AnimatorHash.Die, _IsDead);
 		}
 
 		private void MoveToTarget(Vector3 targetPoint)
@@ -107,8 +101,8 @@ namespace Game
 			if (_AttackCooldown < 0)
 			{
 				PlayerData.IsCritical.Value = Random.value <= PlayerData.CriticalHitRate.Value;
-				SelfAnimator.SetBool(s_Critical, PlayerData.IsCritical.Value);
-				SelfAnimator.SetTrigger(s_Attack);
+				SelfAnimator.SetBool(AnimatorHash.Critical, PlayerData.IsCritical.Value);
+				SelfAnimator.SetTrigger(AnimatorHash.Attack);
 				_AttackCooldown = PlayerData.CoolDown.Value;
 			}
 		}
