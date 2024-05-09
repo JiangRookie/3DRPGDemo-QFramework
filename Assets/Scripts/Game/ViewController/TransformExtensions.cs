@@ -10,5 +10,10 @@ namespace Game
 			float dot = Vector3.Dot(self.forward, direction);
 			return dot >= dotThreshold;
 		}
+
+		public static bool IsFacingTarget(this Transform self, GameObject target, float dotThreshold = 0.5f)
+		{
+			return self.IsFacingTarget(target.transform, dotThreshold);
+		}
 	}
 }

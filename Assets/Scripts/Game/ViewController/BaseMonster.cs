@@ -209,39 +209,25 @@ namespace Game
 			int numColliders = Physics.OverlapSphereNonAlloc(this.Position(), _ViewRange, _Colliders, _PlayerLayerMask);
 			for (int i = 0; i < numColliders; i++)
 			{
-				if (_Colliders[i].CompareTag("Player"))
-				{
-					_AttackTarget = _Colliders[i].gameObject;
-					return true;
-				}
+				if (!_Colliders[i].CompareTag("Player")) continue;
+				_AttackTarget = _Colliders[i].gameObject;
+				return true;
 			}
 
 			_AttackTarget = null;
 			return false;
 		}
 
-		private bool IsTargetInAttackRange()
-		{
-			if (_AttackTarget)
-			{
-				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.AttackRange + SelfNavMeshAgent.stoppingDistance;
-			}
-			return false;
-		}
+		private bool IsTargetInAttackRange() =>
+			_AttackTarget && _AttackTarget.Distance(this) <= SelfCharacterData.AttackRange;
 
-		private bool IsTargetInSkillRange()
-		{
-			if (_AttackTarget)
-			{
-				return Vector3.Distance(_AttackTarget.Position(), this.Position()) <= SelfCharacterData.SkillRange + SelfNavMeshAgent.stoppingDistance;
-			}
-			return false;
-		}
+		private bool IsTargetInSkillRange() =>
+			_AttackTarget && _AttackTarget.Distance(this) <= SelfCharacterData.SkillRange;
 
 		// Animation Event
 		public void Hit()
 		{
-			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
+			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget))
 			{
 				TakeDamage(SelfCharacterData, () =>
 				{
