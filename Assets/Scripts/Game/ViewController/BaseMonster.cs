@@ -8,6 +8,8 @@ using Random = UnityEngine.Random;
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
+	public enum EnemyState { Guard, Patrol, Chase, Dead }
+
 	[RequireComponent(typeof(NavMeshAgent))]
 	[RequireComponent(typeof(BoxCollider))]
 	[RequireComponent(typeof(CharacterData))]
@@ -20,35 +22,45 @@ namespace Game
 		private float _AttackCooldown;
 		protected GameObject _AttackTarget;
 		private Collider[] _Colliders = new Collider[10];
+		private Vector3 _InitPosition;
 		private string[] _LayerNames = new[] { "Player" };
 		private bool _PlayerIsDead;
 		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
-		private MonsterState MonsterState { get; set; }
-		private IPatrolPointGenerator PatrolPointGenerator { get; set; }
+		private Vector3 WayPoint { get; set; }
+		private EnemyState State { get; set; }
+		private float InitSpeed { get; set; }
+		private Vector3 InitPosition { get; set; }
+		private Quaternion InitRotation { get; set; }
+		private bool IsChase { get; set; }
+		private bool IsDead { get; set; }
+		private bool IsFollow { get; set; }
+		private bool IsWalk { get; set; }
 
 		private void Awake()
 		{
-			MonsterState = new MonsterState(transform, SelfNavMeshAgent, SelfCharacterData);
-			PatrolPointGenerator = new DefaultPatrolPointGenerator(_PatrolRange, this.Position());
+			InitPosition = transform.Position();
+			InitRotation = transform.Rotation();
+			InitSpeed = SelfNavMeshAgent.speed;
+			_InitPosition = this.Position();
 			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 			_RemainLookAtTime = _LookAtTime;
 		}
 
 		private void Start()
 		{
-			MonsterState.SetInitialState(_IsGuard, PatrolPointGenerator);
+			SetInitialState(_IsGuard);
 			GameManager.Instance.AddObserver(this);
 		}
 
 		private void Update()
 		{
-			MonsterState.CheckAndSetDeadState();
+			CheckAndSetDeadState();
 			if (!_PlayerIsDead)
 			{
 				_AttackCooldown -= Time.deltaTime;
 				SwitchStates();
-				MonsterState.SetAnimationState(SelfAnimator);
+				SetAnimationState();
 			}
 		}
 
@@ -66,23 +78,63 @@ namespace Game
 		{
 			_PlayerIsDead = true;
 			_AttackTarget = null;
-			MonsterState.SetWinState(SelfAnimator);
+			SetWinState();
 		}
 
-		public void GetHit() => MonsterState.SetGetHitState(SelfAnimator);
+		public void GetHit()
+		{
+			SelfAnimator.SetTrigger(AnimatorHash.GetHit);
+		}
+
+		public void SetInitialState(bool isGuard)
+		{
+			if (isGuard)
+			{
+				State = EnemyState.Guard;
+			}
+			else
+			{
+				State = EnemyState.Patrol;
+				GeneratePatrolPoint();
+			}
+		}
+
+		public void CheckAndSetDeadState()
+		{
+			if (SelfCharacterData.CurHealth <= 0)
+			{
+				IsDead = true;
+			}
+		}
+
+		public void SetAnimationState()
+		{
+			SelfAnimator.SetBool(AnimatorHash.Walk, IsWalk);
+			SelfAnimator.SetBool(AnimatorHash.Follow, IsFollow);
+			SelfAnimator.SetBool(AnimatorHash.Chase, IsChase);
+			SelfAnimator.SetBool(AnimatorHash.Critical, SelfCharacterData.IsCritical);
+			SelfAnimator.SetBool(AnimatorHash.Die, IsDead);
+		}
+
+		public void SetWinState()
+		{
+			SelfAnimator.SetBool(AnimatorHash.Win, true);
+			IsChase = false;
+			IsWalk = false;
+		}
 
 		private void SwitchStates()
 		{
-			if (MonsterState.IsDead)
+			if (IsDead)
 			{
-				MonsterState.State = EnemyState.Dead;
+				State = EnemyState.Dead;
 			}
 			else if (IsPlayerInRange())
 			{
-				MonsterState.State = EnemyState.Chase;
+				State = EnemyState.Chase;
 			}
 
-			switch (MonsterState.State)
+			switch (State)
 			{
 				case EnemyState.Guard:
 					Guard();
@@ -101,28 +153,28 @@ namespace Game
 
 		private void Guard()
 		{
-			MonsterState.IsChase = false;
-			if (this.Position() != MonsterState.InitPosition)
+			IsChase = false;
+			if (this.Position() != InitPosition)
 			{
-				MonsterState.IsWalk = true;
+				IsWalk = true;
 				SelfNavMeshAgent.isStopped = false;
-				SelfNavMeshAgent.destination = MonsterState.InitPosition;
+				SelfNavMeshAgent.destination = InitPosition;
 
-				if (Vector3.Distance(MonsterState.InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
+				if (Vector3.Distance(InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
 				{
-					MonsterState.IsWalk = false;
-					transform.rotation = Quaternion.Lerp(transform.rotation, MonsterState.InitRotation, 0.01f);
+					IsWalk = false;
+					transform.rotation = Quaternion.Lerp(transform.rotation, InitRotation, 0.01f);
 				}
 			}
 		}
 
 		private void Patrol()
 		{
-			MonsterState.IsChase = false;
-			SelfNavMeshAgent.speed = MonsterState.InitSpeed * 0.5f;
-			if (Vector3.Distance(this.Position(), PatrolPointGenerator.WayPoint) <= SelfNavMeshAgent.stoppingDistance)
+			IsChase = false;
+			SelfNavMeshAgent.speed = InitSpeed * 0.5f;
+			if (Vector3.Distance(this.Position(), WayPoint) <= SelfNavMeshAgent.stoppingDistance)
 			{
-				MonsterState.IsWalk = false;
+				IsWalk = false;
 				if (_RemainLookAtTime > 0)
 				{
 					_RemainLookAtTime -= Time.deltaTime;
@@ -130,24 +182,24 @@ namespace Game
 				else
 				{
 					_RemainLookAtTime = _LookAtTime;
-					PatrolPointGenerator.GeneratePatrolPoint();
+					GeneratePatrolPoint();
 				}
 			}
 			else
 			{
-				MonsterState.IsWalk = true;
-				SelfNavMeshAgent.destination = PatrolPointGenerator.WayPoint;
+				IsWalk = true;
+				SelfNavMeshAgent.destination = WayPoint;
 			}
 		}
 
 		private void Chase()
 		{
-			MonsterState.IsWalk = false;
-			MonsterState.IsChase = true;
-			SelfNavMeshAgent.speed = MonsterState.InitSpeed;
+			IsWalk = false;
+			IsChase = true;
+			SelfNavMeshAgent.speed = InitSpeed;
 			if (!IsPlayerInRange())
 			{
-				MonsterState.IsFollow = false;
+				IsFollow = false;
 				if (_RemainLookAtTime > 0)
 				{
 					SelfNavMeshAgent.destination = this.Position();
@@ -155,17 +207,17 @@ namespace Game
 				}
 				else if (_IsGuard)
 				{
-					MonsterState.State = EnemyState.Guard;
+					State = EnemyState.Guard;
 				}
 				else
 				{
-					MonsterState.State = EnemyState.Patrol;
+					State = EnemyState.Patrol;
 				}
 			}
 			else
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
-				MonsterState.IsFollow = true;
+				IsFollow = true;
 				SelfNavMeshAgent.isStopped = false;
 			}
 
@@ -173,7 +225,7 @@ namespace Game
 			bool isTargetInSkillRange = IsTargetInSkillRange();
 			if (isTargetInAttackRange || isTargetInSkillRange)
 			{
-				MonsterState.IsFollow = false;
+				IsFollow = false;
 				SelfNavMeshAgent.isStopped = true;
 				AttackTarget(isTargetInAttackRange, isTargetInSkillRange);
 			}
@@ -245,6 +297,16 @@ namespace Game
 				criticalAction?.Invoke();
 			}
 			PlayerData.TakeHurt((int)baseDamage);
+		}
+
+		private void GeneratePatrolPoint()
+		{
+			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
+			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
+			var newPoint = new Vector3(_InitPosition.x + randomX, _InitPosition.y, _InitPosition.z + randomZ);
+			WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
+				? hit.position
+				: _InitPosition;
 		}
 	}
 }
