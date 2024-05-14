@@ -3,7 +3,7 @@
 namespace Game
 {
 	[CreateAssetMenu(fileName = "CharacterCommonData", menuName = "SO/CreateCharacterCommonData")]
-	public class CharacterCommonData_SO : ScriptableObject
+	public class CharacterBaseData_SO : ScriptableObject
 	{
 		public int MaxHealth;
 		public int CurHealth;

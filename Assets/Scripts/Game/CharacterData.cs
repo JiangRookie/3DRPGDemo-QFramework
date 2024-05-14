@@ -5,8 +5,8 @@ namespace Game
 {
 	public class CharacterData : MonoBehaviour
 	{
-		public CharacterCommonData_SO CharacterBaseData;
-		public CharacterCommonData_SO TemplateData;
+		public CharacterBaseData_SO CharacterBaseData;
+		public CharacterBaseData_SO TemplateData;
 		public AttackData_SO CharacterAttackData;
 		public EasyEvent<int, int> OnHealthChanged = new EasyEvent<int, int>();
 		public bool IsCritical { get; set; }

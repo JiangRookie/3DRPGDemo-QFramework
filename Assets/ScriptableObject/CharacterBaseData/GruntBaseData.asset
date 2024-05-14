@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f215975e5ee494c907ce13de70ca2bd, type: 3}
-  m_Name: GolemBaseData
+  m_Name: GruntBaseData
   m_EditorClassIdentifier: 
-  MaxHealth: 100
-  CurHealth: 100
-  BaseDefense: 5
-  CurDefense: 5
+  MaxHealth: 75
+  CurHealth: 75
+  BaseDefense: 4
+  CurDefense: 4
   Exp: 50

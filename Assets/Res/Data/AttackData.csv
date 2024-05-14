@@ -1,0 +1,8 @@
+Name,Slime,Turtle,Grunt,Golem
+AttackRange,1,1,2.3,3.5
+SkillRange,2,2,1.6,10
+CoolDown,1,1,2,4
+MinDamage,2,3,5,6
+MaxDamage,4,5,7,10
+CriticalHitBonusPercentage,2,2,2,2
+CriticalHitRate,0.2,0.2,0.2,0.2

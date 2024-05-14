@@ -1,0 +1,6 @@
+Name,Slime,Turtle,Grunt,Golem
+MaxHealth,30,50,75,100
+CurHealth,30,50,75,100
+BaseDefense,2,3,4,5
+CurDefense,2,3,4,5
+Exp,10,25,50,100

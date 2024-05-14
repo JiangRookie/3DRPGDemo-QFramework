@@ -2,6 +2,8 @@
 
 namespace Game
 {
+	public enum MonsterName { Slime, Turtle, Grunt, Golem, }
+
 	[CreateAssetMenu(fileName = "AttackData", menuName = "SO/CreateAttackData")]
 	public class AttackData_SO : ScriptableObject
 	{

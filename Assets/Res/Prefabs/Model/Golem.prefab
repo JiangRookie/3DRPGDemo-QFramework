@@ -799,8 +799,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterBaseData: {fileID: 0}
-  TemplateData: {fileID: 11400000, guid: c200b68f7badcf14e866a88a8f4d5863, type: 2}
-  CharacterAttackData: {fileID: 11400000, guid: 0015cbf4cb9464343b05a9a020504a91, type: 2}
+  TemplateData: {fileID: 11400000, guid: eb30a60bcac17c748967f8bae06211ae, type: 2}
+  CharacterAttackData: {fileID: 11400000, guid: 63775ccc286570a40af3817dc61f37bf, type: 2}
 --- !u!114 &2100851940229327037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -819,6 +819,7 @@ MonoBehaviour:
   GeneratePrefab: 0
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
+  ViewControllerFullTypeName: 
   SelfNavMeshAgent: {fileID: 2100851940229327039}
   SelfAnimator: {fileID: 2100851940229327026}
   SelfCharacterData: {fileID: 2100851940229327038}
@@ -865,12 +866,13 @@ MonoBehaviour:
   GeneratePrefab: 0
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
+  ViewControllerFullTypeName: 
   HealthBarPrefab: {fileID: 5706894216726464733, guid: fa4cba5939d8d514882b756d5494f6c0, type: 3}
   HealthBarPointTransform: {fileID: 6050039532499501586}
   SelfCharacterData: {fileID: 2100851940229327038}
   _AlwaysVisible: 1
-  _VisibleTime: 0
-  _TimeLeft: 0
+  _HealthBarDisplayDuration: 0
+  _RemainingHealthBarDisplayTime: 3
 --- !u!1 &2100851940372679160
 GameObject:
   m_ObjectHideFlags: 0
