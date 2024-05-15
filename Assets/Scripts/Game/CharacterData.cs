@@ -1,13 +1,17 @@
-﻿using QFramework;
+﻿using Game.SO;
+using OhJiang.Attributes;
+using QFramework;
+using UnityEditor;
 using UnityEngine;
 
 namespace Game
 {
 	public class CharacterData : MonoBehaviour
 	{
+		public MonsterName MonsterName;
 		public CharacterBaseData_SO CharacterBaseData;
-		public CharacterBaseData_SO TemplateData;
-		public AttackData_SO CharacterAttackData;
+		public CharacterBaseData_SO TemplateCharacterData;
+		public AttackData_SO AttackData;
 		public EasyEvent<int, int> OnHealthChanged = new EasyEvent<int, int>();
 		public bool IsCritical { get; set; }
 
@@ -15,9 +19,9 @@ namespace Game
 
 		private void Awake()
 		{
-			if (TemplateData)
+			if (TemplateCharacterData)
 			{
-				CharacterBaseData = Instantiate(TemplateData);
+				CharacterBaseData = Instantiate(TemplateCharacterData);
 			}
 		}
 
@@ -63,64 +67,64 @@ namespace Game
 
 		public float AttackRange
 		{
-			get => CharacterAttackData ? CharacterAttackData.AttackRange : 0;
+			get => AttackData ? AttackData.AttackRange : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.AttackRange = value;
+				if (AttackData) AttackData.AttackRange = value;
 			}
 		}
 
 		public float SkillRange
 		{
-			get => CharacterAttackData ? CharacterAttackData.SkillRange : 0;
+			get => AttackData ? AttackData.SkillRange : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.SkillRange = value;
+				if (AttackData) AttackData.SkillRange = value;
 			}
 		}
 
 		public float CoolDown
 		{
-			get => CharacterAttackData ? CharacterAttackData.CoolDown : 0;
+			get => AttackData ? AttackData.CoolDown : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.CoolDown = value;
+				if (AttackData) AttackData.CoolDown = value;
 			}
 		}
 
 		public int MinDamage
 		{
-			get => CharacterAttackData ? CharacterAttackData.MinDamage : 0;
+			get => AttackData ? AttackData.MinDamage : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.MinDamage = value;
+				if (AttackData) AttackData.MinDamage = value;
 			}
 		}
 
 		public int MaxDamage
 		{
-			get => CharacterAttackData ? CharacterAttackData.MaxDamage : 0;
+			get => AttackData ? AttackData.MaxDamage : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.MaxDamage = value;
+				if (AttackData) AttackData.MaxDamage = value;
 			}
 		}
 
 		public float CriticalHitBonusPercentage
 		{
-			get => CharacterAttackData ? CharacterAttackData.CriticalHitBonusPercentage : 0;
+			get => AttackData ? AttackData.CriticalHitBonusPercentage : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.CriticalHitBonusPercentage = value;
+				if (AttackData) AttackData.CriticalHitBonusPercentage = value;
 			}
 		}
 
 		public float CriticalHitRate
 		{
-			get => CharacterAttackData ? CharacterAttackData.CriticalHitRate : 0;
+			get => AttackData ? AttackData.CriticalHitRate : 0;
 			set
 			{
-				if (CharacterAttackData) CharacterAttackData.CriticalHitRate = value;
+				if (AttackData) AttackData.CriticalHitRate = value;
 			}
 		}
 
@@ -134,5 +138,42 @@ namespace Game
 		}
 
 		#endregion
+
+		[Button]
+		private void SetupCharacterData()
+		{
+			// Get all selected GameObjects
+			GameObject[] selectedObjects = Selection.gameObjects;
+
+			// Process each selected GameObject
+			foreach (GameObject selectedObject in selectedObjects)
+			{
+				CharacterData characterData = selectedObject.GetComponent<CharacterData>();
+				if (characterData != null)
+				{
+					// Get all ScriptableObject assets from the "Assets/ScriptableObject" directory
+					string[] guids = AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/ScriptableObject" });
+					foreach (string guid in guids)
+					{
+						string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+						ScriptableObject asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
+
+						// Check if the asset's name contains the MonsterName
+						if (asset.name.Contains(characterData.MonsterName.ToString()))
+						{
+							// Check the type of the asset and assign it to the corresponding field
+							if (asset is CharacterBaseData_SO)
+							{
+								characterData.TemplateCharacterData = asset as CharacterBaseData_SO;
+							}
+							else if (asset is AttackData_SO)
+							{
+								characterData.AttackData = asset as AttackData_SO;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Game
+namespace Game.SO
 {
 	[CreateAssetMenu(fileName = "CharacterCommonData", menuName = "SO/CreateCharacterCommonData")]
 	public class CharacterBaseData_SO : ScriptableObject

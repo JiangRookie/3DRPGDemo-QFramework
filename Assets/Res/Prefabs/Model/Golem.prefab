@@ -798,9 +798,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aa3784f94ba4da9a6ee103eb246caaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MonsterName: 3
   CharacterBaseData: {fileID: 0}
-  TemplateData: {fileID: 11400000, guid: eb30a60bcac17c748967f8bae06211ae, type: 2}
-  CharacterAttackData: {fileID: 11400000, guid: 63775ccc286570a40af3817dc61f37bf, type: 2}
+  TemplateCharacterData: {fileID: 11400000, guid: eb30a60bcac17c748967f8bae06211ae, type: 2}
+  AttackData: {fileID: 11400000, guid: 6cbe113ab5247a740b0f2285eeb31911, type: 2}
 --- !u!114 &2100851940229327037
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Game
+namespace Game.SO
 {
 	public enum MonsterName { Slime, Turtle, Grunt, Golem, }
 
