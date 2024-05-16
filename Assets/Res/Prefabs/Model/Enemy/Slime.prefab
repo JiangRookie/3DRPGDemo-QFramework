@@ -170,8 +170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MonsterName: 0
   CharacterBaseData: {fileID: 0}
-  TemplateCharacterData: {fileID: 11400000, guid: 6665eaede8c46164190abaa81ef4d24a, type: 2}
-  AttackData: {fileID: 11400000, guid: f1789ca2d04c62f439ea0d9c385b9527, type: 2}
+  TemplateCharacterData: {fileID: 11400000, guid: 0e12c2fdef5f7e04eb00c2104b7446b8, type: 2}
+  AttackData: {fileID: 11400000, guid: e615f7b9a2f1cb3478e4db38968266d5, type: 2}
 --- !u!114 &1384939115545458207
 MonoBehaviour:
   m_ObjectHideFlags: 0

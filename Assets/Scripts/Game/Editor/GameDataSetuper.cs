@@ -12,12 +12,12 @@ namespace Game
 	{
 		public static void SetupAttackData(string writePath, string readPath)
 		{
-			SetupData<AttackData_SO>(writePath, readPath, "AttackData");
+			SetupData<AttackData_SO>(writePath, readPath, "AttackBaseData");
 		}
 
 		public static void SetupCharacterBaseData(string writePath, string readPath)
 		{
-			SetupData<CharacterBaseData_SO>(writePath, readPath, "CharacterBaseData");
+			SetupData<CharacterBaseData_SO>(writePath, readPath, "BaseData");
 		}
 
 		private static void SetupData<T>(string writePath, string readPath, string folderName) where T : ScriptableObject
@@ -34,7 +34,7 @@ namespace Game
 
 			foreach (MonsterName monsterName in Enum.GetValues(typeof(MonsterName)))
 			{
-				string assetPath = $"{writePath}/{folderName}/{monsterName}BaseData.asset";
+				string assetPath = $"{writePath}/{folderName}/{monsterName}{folderName}.asset";
 				T data = AssetDatabase.LoadAssetAtPath<T>(assetPath);
 
 				if (data == null)

@@ -9,8 +9,8 @@ namespace OhJiang.Editor
 {
 	public class CharacterDataSetupTool : EditorWindow
 	{
-		private string _ToWriteFileFolderPath;
-		private string _ToReadFileFolderPath;
+		private string _ToWriteFileFolderPath = "Assets/ScriptableObject";
+		private string _ToReadFileFolderPath = "Assets/Res/Data";
 
 		[MenuItem("Tools/创建角色基础数据")]
 		private static void OpenWindow()

@@ -1,7 +1,5 @@
 ﻿using Game.SO;
-using OhJiang.Attributes;
 using QFramework;
-using UnityEditor;
 using UnityEngine;
 
 namespace Game
@@ -138,42 +136,5 @@ namespace Game
 		}
 
 		#endregion
-
-		[Button]
-		private void SetupCharacterData()
-		{
-			// Get all selected GameObjects
-			GameObject[] selectedObjects = Selection.gameObjects;
-
-			// Process each selected GameObject
-			foreach (GameObject selectedObject in selectedObjects)
-			{
-				CharacterData characterData = selectedObject.GetComponent<CharacterData>();
-				if (characterData != null)
-				{
-					// Get all ScriptableObject assets from the "Assets/ScriptableObject" directory
-					string[] guids = AssetDatabase.FindAssets("t:ScriptableObject", new[] { "Assets/ScriptableObject" });
-					foreach (string guid in guids)
-					{
-						string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-						ScriptableObject asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
-
-						// Check if the asset's name contains the MonsterName
-						if (asset.name.Contains(characterData.MonsterName.ToString()))
-						{
-							// Check the type of the asset and assign it to the corresponding field
-							if (asset is CharacterBaseData_SO)
-							{
-								characterData.TemplateCharacterData = asset as CharacterBaseData_SO;
-							}
-							else if (asset is AttackData_SO)
-							{
-								characterData.AttackData = asset as AttackData_SO;
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 }
