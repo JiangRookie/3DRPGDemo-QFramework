@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using QFramework;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -13,6 +14,7 @@ namespace Game
 		private GameObject _AttackTarget;
 		private bool _IsDead;
 		private float _StopDistance;
+		private bool _IsAttacking = false;
 
 		private void Awake()
 		{
@@ -39,6 +41,19 @@ namespace Game
 			}
 			_AttackCooldown -= Time.deltaTime;
 			SwitchAnimation();
+			ExitAttack();
+			if (_IsAttacking)
+			{
+				if (_AttackTarget.Distance(this) > PlayerData.AttackRange.Value)
+				{
+					SelfNavMeshAgent.destination = _AttackTarget.Position();
+				}
+				else
+				{
+					SelfNavMeshAgent.isStopped = true;
+					AttackTarget();
+				}
+			}
 		}
 
 		public void GetHit()
@@ -74,26 +89,11 @@ namespace Game
 			if (targetGameObj)
 			{
 				_AttackTarget = targetGameObj;
-				StartCoroutine(MoveToAttackTargetCoroutine());
+				SelfNavMeshAgent.isStopped = false;
+				SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value;
+				transform.LookAt(_AttackTarget.transform);
+				_IsAttacking = true;
 			}
-		}
-
-		private IEnumerator MoveToAttackTargetCoroutine()
-		{
-			SelfNavMeshAgent.isStopped = false;
-			SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value;
-
-			transform.LookAt(_AttackTarget.transform);
-
-			while (Vector3.Distance(_AttackTarget.Position(), this.Position()) > PlayerData.AttackRange.Value)
-			{
-				SelfNavMeshAgent.destination = _AttackTarget.Position();
-				yield return null;
-			}
-
-			SelfNavMeshAgent.isStopped = true;
-
-			AttackTarget();
 		}
 
 		private void AttackTarget()
@@ -102,8 +102,14 @@ namespace Game
 			{
 				PlayerData.IsCritical.Value = Random.value <= PlayerData.CriticalHitRate.Value;
 				SelfAnimator.SetBool(AnimatorHash.Critical, PlayerData.IsCritical.Value);
-				SelfAnimator.SetTrigger(AnimatorHash.Attack);
+
+				// SelfAnimator.SetTrigger(AnimatorHash.Attack);
+				Attack();
 				_AttackCooldown = PlayerData.CoolDown.Value;
+			}
+			else
+			{
+				_IsAttacking = false;
 			}
 		}
 
@@ -128,6 +134,46 @@ namespace Game
 						});
 				}
 			}
+		}
+
+		public List<AttackCombo_SO> ComboList;
+		private float _LastClickedTime;
+		private float _LastCombaEnd;
+		private int _ComboCounter;
+
+		private void Attack()
+		{
+			if (Time.time - _LastCombaEnd > 0.2f)
+			{
+				CancelInvoke(nameof(EndCombo));
+				if (Time.time - _LastClickedTime >= 0.2f)
+				{
+					if (_ComboCounter >= ComboList.Count)
+					{
+						_ComboCounter = 0;
+					}
+					SelfAnimator.runtimeAnimatorController = ComboList[_ComboCounter].AnimatorOV;
+					SelfAnimator.Play("Attack", 0, 0);
+					PlayerData.MinDamage.Value = ComboList[_ComboCounter].Damage;
+					PlayerData.MaxDamage.Value = ComboList[_ComboCounter].Damage;
+					_ComboCounter++;
+					_LastClickedTime = Time.time;
+				}
+			}
+		}
+
+		private void ExitAttack()
+		{
+			if (SelfAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f && SelfAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+			{
+				Invoke(nameof(EndCombo), 1f);
+			}
+		}
+
+		private void EndCombo()
+		{
+			_ComboCounter = 0;
+			_LastCombaEnd = Time.time;
 		}
 	}
 }
