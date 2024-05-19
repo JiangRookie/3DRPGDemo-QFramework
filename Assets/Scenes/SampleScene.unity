@@ -10487,7 +10487,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779475760}
-  m_LocalRotation: {x: -0, y: 0.9772671, z: -0.212012, w: 0}
+  m_LocalRotation: {x: -0, y: 0.9772671, z: -0.212012, w: 1e-45}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -11468,7 +11468,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1948767722}
-  m_LocalRotation: {x: -0.0000000068471717, y: 0.973249, z: -0.22975294, w: -0.000000029005083}
+  m_LocalRotation: {x: 5.0309986e-23, y: 0.973249, z: -0.22975291, w: -1.7763568e-15}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -12459,6 +12459,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Golem
       objectReference: {fileID: 0}
+    - target: {fileID: 2100851940229327027, guid: ce6a1f2838158524ca2f24e46571f30c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce6a1f2838158524ca2f24e46571f30c, type: 3}
 --- !u!1001 &2199353049363832122
@@ -12515,6 +12519,10 @@ PrefabInstance:
     - target: {fileID: 2199353050781096922, guid: f55eea4d14a715740afa24aed4e616bb, type: 3}
       propertyPath: m_Name
       value: Grunt
+      objectReference: {fileID: 0}
+    - target: {fileID: 2199353050781096922, guid: f55eea4d14a715740afa24aed4e616bb, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f55eea4d14a715740afa24aed4e616bb, type: 3}
@@ -12573,6 +12581,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TurtleShell
       objectReference: {fileID: 0}
+    - target: {fileID: 6685010240252715337, guid: 4b85db5035775ea498f6d696b9af78c9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4b85db5035775ea498f6d696b9af78c9, type: 3}
 --- !u!1001 &8105734948153030585
@@ -12585,6 +12597,10 @@ PrefabInstance:
     - target: {fileID: 1384939115545458204, guid: b92a3293cd12c8e458991c9c4be4a6ae, type: 3}
       propertyPath: m_Name
       value: Slime
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384939115545458204, guid: b92a3293cd12c8e458991c9c4be4a6ae, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1761921638536916134, guid: b92a3293cd12c8e458991c9c4be4a6ae, type: 3}
       propertyPath: m_RootOrder

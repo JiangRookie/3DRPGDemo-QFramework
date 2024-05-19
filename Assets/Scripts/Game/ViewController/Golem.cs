@@ -9,14 +9,16 @@ namespace Game
 	{
 		[SerializeField] private float _PushingForce = 30f;
 
+		// Animation Event
 		public void Push()
 		{
-			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget.transform))
-			{
-				_AttackTarget.GetComponent<IPushable>()
-				   .SetPushed(_AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce);
-				TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
-			}
+			if (!_AttackTarget) return;
+			if (!transform.IsFacingTarget(_AttackTarget.transform)) return;
+			var pushedToPosition = _AttackTarget.NormalizedDirectionFrom(gameObject) * _PushingForce;
+			_AttackTarget
+			   .GetComponent<IPushable>()
+			   .SetPushed(pushedToPosition);
+			TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
 		}
 
 		// Animation Event

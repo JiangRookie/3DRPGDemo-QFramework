@@ -48,7 +48,7 @@ namespace Game
 			ExitAttack();
 			if (_IsAttacking)
 			{
-				if (_AttackTarget.Distance(this) > PlayerData.AttackRange.Value)
+				if (_AttackTarget && _AttackTarget.Distance(this) > PlayerData.AttackRange.Value)
 				{
 					SelfNavMeshAgent.destination = _AttackTarget.Position();
 				}

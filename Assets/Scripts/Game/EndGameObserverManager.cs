@@ -2,7 +2,7 @@
 
 namespace Game
 {
-	public class ObserverManager
+	public class EndGameObserverManager
 	{
 		private List<IEndGameObserver> _EndGameObservers = new List<IEndGameObserver>();
 

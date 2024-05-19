@@ -18,10 +18,8 @@ namespace Game
 
 		private void Awake()
 		{
-			if (TemplateCharacterData)
-			{
-				CharacterBaseData = Instantiate(TemplateCharacterData);
-			}
+			Debug.Assert(TemplateCharacterData, $"请检查你的 {gameObject.name} prefab 中的 TemplateCharacterData 是否已经赋值。");
+			CharacterBaseData = Instantiate(TemplateCharacterData);
 		}
 
 		public int MaxHealth

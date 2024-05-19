@@ -45,16 +45,18 @@ namespace Game
 					}
 					break;
 				case RockState.HitEnemy:
-					var golem = other.gameObject.GetComponent<Golem>();
-					if (golem)
+					var enemy = other.gameObject.GetComponent<Golem>();
+					if (enemy)
 					{
-						PlayerData.InflictDamage(golem.SelfCharacterData, _Damage);
+						Debug.Log("Hit Enemy");
+						PlayerData.InflictDamage(enemy.SelfCharacterData, _Damage);
 
 						RockBreakEffect
 						   .Instantiate()
 						   .Position(this.Position())
-						   .RotationIdentity()
-						   .DestroySelf();
+						   .RotationIdentity();
+
+						this.DestroyGameObj();
 					}
 					break;
 				case RockState.HitNothing: break;
@@ -68,6 +70,11 @@ namespace Game
 			SelfRigidbody.AddForce(direction * 20, ForceMode.Impulse);
 		}
 
+		public void SetAttackTarget(GameObject attackTarget)
+		{
+			_Target = attackTarget;
+		}
+
 		private void FlyToTarget()
 		{
 			if (!_Target)
@@ -76,11 +83,6 @@ namespace Game
 			}
 			_Direction = (_Target.Position() - this.Position() + Vector3.up).normalized;
 			SelfRigidbody.AddForce(_Direction * _Force, ForceMode.Impulse);
-		}
-
-		public void SetAttackTarget(GameObject attackTarget)
-		{
-			_Target = attackTarget;
 		}
 	}
 }

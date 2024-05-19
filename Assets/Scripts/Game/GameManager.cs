@@ -4,21 +4,21 @@ namespace Game
 {
 	public class GameManager : MonoSingleton<GameManager>
 	{
-		private ObserverManager observerManager = new ObserverManager();
+		private EndGameObserverManager _EndGameObserverManager = new EndGameObserverManager();
 
 		public void AddObserver(IEndGameObserver observer)
 		{
-			observerManager.AddObserver(observer);
+			_EndGameObserverManager.AddObserver(observer);
 		}
 
 		public void RemoveObserver(IEndGameObserver observer)
 		{
-			observerManager.RemoveObserver(observer);
+			_EndGameObserverManager.RemoveObserver(observer);
 		}
 
 		public void NotifyObservers()
 		{
-			observerManager.NotifyObservers();
+			_EndGameObserverManager.NotifyObservers();
 		}
 	}
 }
