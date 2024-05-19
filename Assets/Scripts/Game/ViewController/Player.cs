@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using Game.SO;
 using QFramework;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -10,11 +10,15 @@ namespace Game
 {
 	public partial class Player : ViewController, IGetHit, IPushable
 	{
+		public List<AttackCombo_SO> ComboList;
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
-		private bool _IsDead;
-		private float _StopDistance;
+		private int _ComboCounter;
 		private bool _IsAttacking = false;
+		private bool _IsDead;
+		private float _LastClickedTime;
+		private float _LastCombaEnd;
+		private float _StopDistance;
 
 		private void Awake()
 		{
@@ -127,7 +131,7 @@ namespace Game
 				}
 				else if (_AttackTarget.CompareTag("Enemy"))
 				{
-					PlayerData.TakeDamage(_AttackTarget.GetComponent<CharacterData>(),
+					PlayerData.InflictDamage(_AttackTarget.GetComponent<CharacterData>(),
 						() =>
 						{
 							_AttackTarget.GetComponent<IGetHit>().GetHit();
@@ -135,11 +139,6 @@ namespace Game
 				}
 			}
 		}
-
-		public List<AttackCombo_SO> ComboList;
-		private float _LastClickedTime;
-		private float _LastCombaEnd;
-		private int _ComboCounter;
 
 		private void Attack()
 		{

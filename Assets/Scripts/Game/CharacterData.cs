@@ -1,4 +1,5 @@
-﻿using Game.SO;
+﻿using System;
+using Game.SO;
 using QFramework;
 using UnityEngine;
 
@@ -136,5 +137,16 @@ namespace Game
 		}
 
 		#endregion
+
+		public void TakeDamage(int damage, Action<int> onDie = null)
+		{
+			int realDamage = Mathf.Max(damage - CurDefense, 1);
+			CurHealth = Mathf.Max(CurHealth - realDamage, 0);
+			OnHealthChanged.Trigger(CurHealth, MaxHealth);
+			if (CurHealth <= 0)
+			{
+				onDie?.Invoke(Exp);
+			}
+		}
 	}
 }

@@ -48,7 +48,7 @@ namespace Game
 					var golem = other.gameObject.GetComponent<Golem>();
 					if (golem)
 					{
-						PlayerData.TakeDamage(_Damage, golem.SelfCharacterData);
+						PlayerData.InflictDamage(golem.SelfCharacterData, _Damage);
 
 						RockBreakEffect
 						   .Instantiate()

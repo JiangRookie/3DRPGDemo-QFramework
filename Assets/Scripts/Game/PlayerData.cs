@@ -68,7 +68,7 @@ namespace Game
 			LevelBuff.Register(levelBuff => PlayerPrefs.SetFloat("levelBuff", levelBuff));
 		}
 
-		public static void TakeDamage(CharacterData target, Action criticalAction = null)
+		public static void InflictDamage(CharacterData target, Action criticalAction = null)
 		{
 			float baseDamage = Random.Range(MinDamage.Value, MaxDamage.Value + 1);
 			if (IsCritical.Value)
@@ -76,24 +76,12 @@ namespace Game
 				baseDamage *= CriticalHitBonusPercentage.Value;
 				criticalAction?.Invoke();
 			}
-			int realDamage = Mathf.Max((int)baseDamage - target.CurDefense, 1);
-			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
-			target.OnHealthChanged.Trigger(target.CurHealth, target.MaxHealth);
-			if (target.CurHealth <= 0)
-			{
-				UpdateExp(target.Exp);
-			}
+			InflictDamage(target, (int)baseDamage);
 		}
 
-		public static void TakeDamage(int damage, CharacterData target, Action criticalAction = null)
+		public static void InflictDamage(CharacterData target, int forceDamage)
 		{
-			int realDamage = Mathf.Max(damage - target.CurDefense, 1);
-			target.CurHealth = Mathf.Max(target.CurHealth - realDamage, 0);
-			target.OnHealthChanged.Trigger(target.CurHealth, target.MaxHealth);
-			if (target.CurHealth <= 0)
-			{
-				UpdateExp(target.Exp);
-			}
+			target.TakeDamage(forceDamage, onDie: UpdateExp);
 		}
 
 		public static void TakeHurt(int damage)
@@ -105,7 +93,7 @@ namespace Game
 		private static void UpdateExp(int exp)
 		{
 			CurExp.Value += exp;
-			if (CurExp.Value > ExpToNextLevel.Value)
+			if (CurExp.Value >= ExpToNextLevel.Value)
 			{
 				LevelUp();
 			}
@@ -117,6 +105,9 @@ namespace Game
 			ExpToNextLevel.Value += (int)(ExpToNextLevel.Value * LevelMultiplier);
 			MaxHealth.Value = (int)(MaxHealth.Value * LevelMultiplier);
 			CurHealth.Value = MaxHealth.Value;
+			MinDamage.Value += 1;
+			MaxDamage.Value += 1;
+			CurDefense.Value += 1;
 		}
 	}
 }
