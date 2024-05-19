@@ -48,7 +48,7 @@ namespace Game
 			LevelBuff.Value = PlayerPrefs.GetFloat("levelBuff", 0.1f);
 		}
 
-		public static void Save()
+		public static void RegisterSaveEvent()
 		{
 			MaxHealth.Register(maxHealth => PlayerPrefs.SetInt("maxHealth", maxHealth));
 			CurHealth.Register(curHealth => PlayerPrefs.SetInt("curHealth", curHealth));

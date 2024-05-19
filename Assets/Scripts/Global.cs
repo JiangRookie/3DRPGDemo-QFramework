@@ -11,7 +11,7 @@ namespace Game
 			ResKit.Init();
 			UIKit.Root.SetResolution(1920, 1080, 1);
 			PlayerData.Load();
-			PlayerData.Save();
+			PlayerData.RegisterSaveEvent();
 			_ = Interface; // 初始化所有的 model 和 system
 		}
 
