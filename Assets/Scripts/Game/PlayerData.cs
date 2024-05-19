@@ -28,6 +28,46 @@ namespace Game
 		public static BindableProperty<float> LevelBuff = new BindableProperty<float>(0.1f);
 		private static float LevelMultiplier => 1 + (CurLevel.Value - 1) * LevelBuff.Value;
 
+		public static void Load()
+		{
+			MaxHealth.Value = PlayerPrefs.GetInt("maxHealth", 100);
+			CurHealth.Value = PlayerPrefs.GetInt("curHealth", 100);
+			BaseDefense.Value = PlayerPrefs.GetInt("baseDefense", 2);
+			CurDefense.Value = PlayerPrefs.GetInt("curDefense", 2);
+			AttackRange.Value = PlayerPrefs.GetFloat("attackRange", 2);
+			SkillRange.Value = PlayerPrefs.GetFloat("skillRange", 0);
+			CoolDown.Value = PlayerPrefs.GetFloat("coolDown", 0.7f);
+			MinDamage.Value = PlayerPrefs.GetInt("minDamage", 4);
+			MaxDamage.Value = PlayerPrefs.GetInt("maxDamage", 6);
+			CriticalHitBonusPercentage.Value = PlayerPrefs.GetFloat("criticalHitBonusPercentage", 2f);
+			CriticalHitRate.Value = PlayerPrefs.GetFloat("criticalHitRate", 0.2f);
+			CurLevel.Value = PlayerPrefs.GetInt("curLevel", 1);
+			MaxLevel.Value = PlayerPrefs.GetInt("maxLevel", 30);
+			ExpToNextLevel.Value = PlayerPrefs.GetInt("expToNextLevel", 30);
+			CurExp.Value = PlayerPrefs.GetInt("curExp", 0);
+			LevelBuff.Value = PlayerPrefs.GetFloat("levelBuff", 0.1f);
+		}
+
+		public static void Save()
+		{
+			MaxHealth.Register(maxHealth => PlayerPrefs.SetInt("maxHealth", maxHealth));
+			CurHealth.Register(curHealth => PlayerPrefs.SetInt("curHealth", curHealth));
+			BaseDefense.Register(baseDefense => PlayerPrefs.SetInt("baseDefense", baseDefense));
+			CurDefense.Register(curDefense => PlayerPrefs.SetInt("curDefense", curDefense));
+			AttackRange.Register(attackRange => PlayerPrefs.SetFloat("attackRange", attackRange));
+			SkillRange.Register(skillRange => PlayerPrefs.SetFloat("skillRange", skillRange));
+			CoolDown.Register(coolDown => PlayerPrefs.SetFloat("coolDown", coolDown));
+			MinDamage.Register(minDamage => PlayerPrefs.SetInt("minDamage", minDamage));
+			MaxDamage.Register(maxDamage => PlayerPrefs.SetInt("maxDamage", maxDamage));
+			CriticalHitBonusPercentage.Register(criticalHitBonusPercentage => PlayerPrefs.SetFloat("criticalHitBonusPercentage", criticalHitBonusPercentage));
+			CriticalHitRate.Register(criticalHitRate => PlayerPrefs.SetFloat("criticalHitRate", criticalHitRate));
+			CurLevel.Register(curLevel => PlayerPrefs.SetInt("curLevel", curLevel));
+			MaxLevel.Register(maxLevel => PlayerPrefs.SetInt("maxLevel", maxLevel));
+			ExpToNextLevel.Register(expToNextLevel => PlayerPrefs.SetInt("expToNextLevel", expToNextLevel));
+			CurExp.Register(curExp => PlayerPrefs.SetInt("curExp", curExp));
+			LevelBuff.Register(levelBuff => PlayerPrefs.SetFloat("levelBuff", levelBuff));
+		}
+
 		public static void TakeDamage(CharacterData target, Action criticalAction = null)
 		{
 			float baseDamage = Random.Range(MinDamage.Value, MaxDamage.Value + 1);
@@ -77,7 +117,6 @@ namespace Game
 			ExpToNextLevel.Value += (int)(ExpToNextLevel.Value * LevelMultiplier);
 			MaxHealth.Value = (int)(MaxHealth.Value * LevelMultiplier);
 			CurHealth.Value = MaxHealth.Value;
-			Debug.Log($"Level Up! Current Level: {CurLevel.Value.ToString()}");
 		}
 	}
 }

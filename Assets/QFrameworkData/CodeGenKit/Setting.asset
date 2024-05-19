@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Namespace: Game
   ScriptDir: Assets/Scripts/Game/ViewController
-  PrefabDir: Assets/Art/Prefab
+  PrefabDir: Assets/Res/Prefabs

@@ -1083,6 +1083,7 @@ MonoBehaviour:
   GeneratePrefab: 0
   PrefabFolder: Assets/Art/Prefab
   ArchitectureFullTypeName: 
+  ViewControllerFullTypeName: 
   SelfNavMeshAgent: {fileID: 5007959702518559462}
   SelfAnimator: {fileID: 5007959702525935961}
 --- !u!114 &5007959702518559464
@@ -1590,7 +1591,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5007959702518198069
 Transform:
   m_ObjectHideFlags: 0
@@ -2298,7 +2299,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5007959702518197979
 Transform:
   m_ObjectHideFlags: 0

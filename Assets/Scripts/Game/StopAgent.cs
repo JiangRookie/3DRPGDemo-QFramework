@@ -3,33 +3,33 @@ using UnityEngine.AI;
 
 public class StopAgent : StateMachineBehaviour
 {
-	// OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
+	// 当转换开始并且状态机开始评估此状态时，会调用OnStateEnter
 	public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		animator.GetComponent<NavMeshAgent>().isStopped = true;
 	}
 
-	// OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
+	// OnStateUpdate在OnStateEnter和OnStateExit回调之间的每个Update帧上被调用
 	public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
 		animator.GetComponent<NavMeshAgent>().isStopped = true;
 	}
 
-	// OnStateExit is called when a transition ends and the state machine finishes evaluating this state
+	// 当转换结束并且状态机完成评估此状态时，会调用OnStateExit
 	// public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	// {
 	// 	animator.GetComponent<NavMeshAgent>().isStopped = false;
 	// }
 
-	// OnStateMove is called right after Animator.OnAnimatorMove()
+	// OnStateMove在Animator.OnAnimatorMove()之后立即被调用
 	//override public void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	//{
-	//    // Implement code that processes and affects root motion
+	//    // 实现处理和影响根运动的代码
 	//}
 
-	// OnStateIK is called right after Animator.OnAnimatorIK()
+	// OnStateIK在Animator.OnAnimatorIK()之后立即被调用
 	//override public void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	//{
-	//    // Implement code that sets up animation IK (inverse kinematics)
+	//    // 实现设置动画IK（反向运动学）的代码
 	//}
 }
