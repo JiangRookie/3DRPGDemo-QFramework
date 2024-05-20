@@ -119,24 +119,21 @@ namespace Game
 
 		public void Hit()
 		{
-			if (_AttackTarget)
+			if (!_AttackTarget) return;
+			if (_AttackTarget.CompareTag("Attackable"))
 			{
-				if (_AttackTarget.CompareTag("Attackable"))
+				if (_AttackTarget.TryGetComponent(out Rock rock))
 				{
-					var rock = _AttackTarget.GetComponent<Rock>();
-					if (rock && rock.RockState == RockState.HitNothing)
+					rock.TryHandleHit(transform.forward);
+				}
+			}
+			else if (_AttackTarget.CompareTag("Enemy"))
+			{
+				PlayerData.DealDamageToEnemy(_AttackTarget.GetComponent<CharacterData>(),
+					() =>
 					{
-						rock.HandleHit(transform.forward);
-					}
-				}
-				else if (_AttackTarget.CompareTag("Enemy"))
-				{
-					PlayerData.InflictDamage(_AttackTarget.GetComponent<CharacterData>(),
-						() =>
-						{
-							_AttackTarget.GetComponent<IGetHit>().GetHit();
-						});
-				}
+						_AttackTarget.GetComponent<IGetHit>().GetHit();
+					});
 			}
 		}
 

@@ -18,7 +18,7 @@ namespace Game
 			_AttackTarget
 			   .GetComponent<IPushable>()
 			   .SetPushed(pushedToPosition);
-			TakeDamage(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
+			PlayerData.TakeHurt(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
 		}
 
 		// Animation Event

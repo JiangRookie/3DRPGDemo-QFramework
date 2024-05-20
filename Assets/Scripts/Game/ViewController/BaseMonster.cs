@@ -1,4 +1,3 @@
-using System;
 using QFramework;
 using UnityEngine;
 using UnityEngine.AI;
@@ -281,22 +280,8 @@ namespace Game
 		{
 			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget))
 			{
-				TakeDamage(SelfCharacterData, () =>
-				{
-					_AttackTarget.GetComponent<IGetHit>().GetHit();
-				});
+				PlayerData.TakeHurt(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
 			}
-		}
-
-		protected void TakeDamage(CharacterData attacker, Action criticalAction = null)
-		{
-			float baseDamage = Random.Range(attacker.MinDamage, attacker.MaxDamage + 1);
-			if (attacker.IsCritical)
-			{
-				baseDamage *= attacker.CriticalHitBonusPercentage;
-				criticalAction?.Invoke();
-			}
-			PlayerData.TakeHurt((int)baseDamage);
 		}
 
 		private void GeneratePatrolPoint()

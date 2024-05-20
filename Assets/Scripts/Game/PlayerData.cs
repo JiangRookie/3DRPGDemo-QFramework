@@ -68,7 +68,7 @@ namespace Game
 			LevelBuff.Register(levelBuff => PlayerPrefs.SetFloat("levelBuff", levelBuff));
 		}
 
-		public static void InflictDamage(CharacterData target, Action criticalAction = null)
+		public static void DealDamageToEnemy(CharacterData target, Action criticalAction = null)
 		{
 			float baseDamage = Random.Range(MinDamage.Value, MaxDamage.Value + 1);
 			if (IsCritical.Value)
@@ -82,6 +82,17 @@ namespace Game
 		public static void InflictDamage(CharacterData target, int forceDamage)
 		{
 			target.TakeDamage(forceDamage, onDie: UpdateExp);
+		}
+
+		public static void TakeHurt(CharacterData attacker, Action criticalAction = null)
+		{
+			float baseDamage = Random.Range(attacker.MinDamage, attacker.MaxDamage + 1);
+			if (attacker.IsCritical)
+			{
+				baseDamage *= attacker.CriticalHitBonusPercentage;
+				criticalAction?.Invoke();
+			}
+			TakeHurt((int)baseDamage);
 		}
 
 		public static void TakeHurt(int damage)

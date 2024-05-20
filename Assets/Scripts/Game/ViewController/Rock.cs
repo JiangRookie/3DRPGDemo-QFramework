@@ -5,20 +5,20 @@ using UnityEngine;
 // 2.命名空间更改后，生成代码之后，需要把逻辑代码文件（非 Designer）的命名空间手动更改
 namespace Game
 {
-	public enum RockState { HitPlayer, HitEnemy, HitNothing, }
-
 	public partial class Rock : ViewController
 	{
 		[SerializeField] private float _Force;
-		[SerializeField] private GameObject _Target;
 		[SerializeField] private int _Damage;
+		private enum RockState { HitPlayer, HitEnemy, HitNothing }
+		private RockState _RockState = RockState.HitPlayer;
+		private GameObject _AttackTarget;
 		private Vector3 _Direction;
-		public RockState RockState { get; private set; }
 
 		private void Start()
 		{
+			// 设置Rock对象的初始速度为Vector3.one，这样可以确保在FixedUpdate方法中，
+			// Rock对象的速度的平方模长不会小于1，避免Rock对象的状态在游戏开始时就被设置为RockState.HitNothing
 			SelfRigidbody.velocity = Vector3.one;
-			RockState = RockState.HitPlayer;
 			FlyToTarget();
 		}
 
@@ -26,13 +26,13 @@ namespace Game
 		{
 			if (SelfRigidbody.velocity.sqrMagnitude < 1)
 			{
-				RockState = RockState.HitNothing;
+				_RockState = RockState.HitNothing;
 			}
 		}
 
 		private void OnCollisionEnter(Collision other)
 		{
-			switch (RockState)
+			switch (_RockState)
 			{
 				case RockState.HitPlayer:
 					if (other.gameObject.CompareTag("Player"))
@@ -41,15 +41,14 @@ namespace Game
 						   .GetComponent<IPushable>()
 						   .SetPushed(_Direction * _Force);
 						PlayerData.TakeHurt(_Damage);
-						RockState = RockState.HitNothing;
+						_RockState = RockState.HitNothing;
 					}
 					break;
 				case RockState.HitEnemy:
-					var enemy = other.gameObject.GetComponent<Golem>();
-					if (enemy)
+					var golem = other.gameObject.GetComponent<Golem>();
+					if (golem)
 					{
-						Debug.Log("Hit Enemy");
-						PlayerData.InflictDamage(enemy.SelfCharacterData, _Damage);
+						PlayerData.InflictDamage(golem.SelfCharacterData, _Damage);
 
 						RockBreakEffect
 						   .Instantiate()
@@ -59,29 +58,29 @@ namespace Game
 						this.DestroyGameObj();
 					}
 					break;
-				case RockState.HitNothing: break;
 			}
-		}
-
-		public void HandleHit(Vector3 direction)
-		{
-			RockState = RockState.HitEnemy;
-			SelfRigidbody.velocity = Vector3.one;
-			SelfRigidbody.AddForce(direction * 20, ForceMode.Impulse);
 		}
 
 		public void SetAttackTarget(GameObject attackTarget)
 		{
-			_Target = attackTarget;
+			_AttackTarget = attackTarget;
+		}
+
+		public void TryHandleHit(Vector3 direction)
+		{
+			if (_RockState != RockState.HitNothing) return;
+			_RockState = RockState.HitEnemy;
+			SelfRigidbody.velocity = Vector3.one;
+			SelfRigidbody.AddForce(direction * 20, ForceMode.Impulse);
 		}
 
 		private void FlyToTarget()
 		{
-			if (!_Target)
+			if (!_AttackTarget)
 			{
-				_Target = FindObjectOfType<Player>().gameObject; // TODO: 后续修改获取 Player 的方法
+				_AttackTarget = FindObjectOfType<Player>().gameObject;
 			}
-			_Direction = (_Target.Position() - this.Position() + Vector3.up).normalized;
+			_Direction = (_AttackTarget.Position() - this.Position() + Vector3.up).normalized;
 			SelfRigidbody.AddForce(_Direction * _Force, ForceMode.Impulse);
 		}
 	}
