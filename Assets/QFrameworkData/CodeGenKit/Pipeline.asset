@@ -15,16 +15,16 @@ MonoBehaviour:
   CurrentTask:
     ShowLog: 0
     Status: 1
-    GameObject: {fileID: 2100851940229327027, guid: ce6a1f2838158524ca2f24e46571f30c, type: 3}
+    GameObject: {fileID: 0}
     From: 0
     NameToFullName: []
     BindInfos: []
-    ScriptsFolder: Assets\Scripts\Game\ViewController
-    ClassName: Golem
+    ScriptsFolder: Assets/Scripts/Game/ViewController
+    ClassName: RockGenerate
     Namespace: Game
     MainCode: "using UnityEngine;\r\nusing QFramework;\r\n\r\nnamespace Game\r\n{\r\n\tpublic
-      partial class Golem : ViewController\r\n\t{\r\n\t\tvoid Start()\r\n\t\t{\r\n\t\t\t//
+      partial class RockGenerate : ViewController\r\n\t{\r\n\t\tvoid Start()\r\n\t\t{\r\n\t\t\t//
       Code Here\r\n\t\t}\r\n\t}\r\n}\r\n"
-    DesignerCode: "// Generate Id:28387f5b-f402-4ad1-b6da-1cdefcebc572\r\nusing UnityEngine;\r\n\r\nnamespace
-      Game\r\n{\r\n\tpublic partial class Golem\r\n\t{\r\n\r\n\t\tpublic UnityEngine.GameObject
-      Rock;\r\n\r\n\t\tpublic UnityEngine.GameObject RightHandPos;\r\n\r\n\t}\r\n}\r\n"
+    DesignerCode: "// Generate Id:9358e382-3ae9-4146-9ac7-c069d63644e1\r\nusing UnityEngine;\r\n\r\nnamespace
+      Game\r\n{\r\n\tpublic partial class RockGenerate\r\n\t{\r\n\r\n\t\tpublic Game.Rock
+      Rock;\r\n\r\n\t}\r\n}\r\n"

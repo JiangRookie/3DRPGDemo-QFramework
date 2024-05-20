@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace Game
 {
-	public class PlayerData
+	public static class PlayerData
 	{
 		public static BindableProperty<int> MaxHealth = new BindableProperty<int>(100);
 		public static BindableProperty<int> CurHealth = new BindableProperty<int>(100);

@@ -999,9 +999,9 @@ GameObject:
   - component: {fileID: 5007959702518197893}
   - component: {fileID: 5007959702525935961}
   - component: {fileID: 5007959702518559462}
+  - component: {fileID: 818794026444657805}
   - component: {fileID: 5007959702518559466}
   - component: {fileID: 5007959702518559464}
-  - component: {fileID: 818794026444657805}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -1066,6 +1066,20 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!136 &818794026444657805
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5007959702518559461}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.4
+  m_Height: 1.42
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.71, z: 0}
 --- !u!114 &5007959702518559466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1111,20 +1125,6 @@ MonoBehaviour:
     Object: {fileID: 5007959702518559462}
   - MemberName: SelfAnimator
     Object: {fileID: 5007959702525935961}
---- !u!136 &818794026444657805
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5007959702518559461}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.4
-  m_Height: 1.42
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.71, z: 0}
 --- !u!1 &5007959702518559463
 GameObject:
   m_ObjectHideFlags: 0

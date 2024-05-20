@@ -26,11 +26,7 @@ namespace Game
 		{
 			if (_AttackTarget)
 			{
-				Rock.Instantiate()
-				   .Position(RightHandPos.Position())
-				   .RotationIdentity()
-				   .GetComponent<Rock>()
-				   .SetAttackTarget(_AttackTarget);
+				RockGenerate.GenerateRock(RightHandPos.Position(), _AttackTarget);
 			}
 		}
 	}

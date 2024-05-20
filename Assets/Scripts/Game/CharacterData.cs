@@ -14,8 +14,6 @@ namespace Game
 		public EasyEvent<int, int> OnHealthChanged = new EasyEvent<int, int>();
 		public bool IsCritical { get; set; }
 
-		#region CharacterBaseData
-
 		private void Awake()
 		{
 			Debug.Assert(TemplateCharacterData, $"请检查你的 {gameObject.name} prefab 中的 TemplateCharacterData 是否已经赋值。");
@@ -57,10 +55,6 @@ namespace Game
 				if (CharacterBaseData) CharacterBaseData.CurDefense = value;
 			}
 		}
-
-		#endregion
-
-		#region CharacterAttackData
 
 		public float AttackRange
 		{
@@ -133,8 +127,6 @@ namespace Game
 				if (CharacterBaseData) CharacterBaseData.Exp = value;
 			}
 		}
-
-		#endregion
 
 		public void TakeDamage(int damage, Action<int> onDie = null)
 		{

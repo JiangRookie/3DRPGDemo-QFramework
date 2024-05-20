@@ -829,7 +829,6 @@ MonoBehaviour:
   _PatrolRange: 0
   _LookAtTime: 3
   _IsGuard: 1
-  Rock: {fileID: 3622201219443111730, guid: 405a8210e2f7d7a4dbd4fe2cfb7c88b7, type: 3}
   RightHandPos: {fileID: 2100851939973127120}
   _PushingForce: 30
 --- !u!114 &6406149498417931201
@@ -845,8 +844,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Binds:
-  - MemberName: Rock
-    Object: {fileID: 3622201219443111730, guid: 405a8210e2f7d7a4dbd4fe2cfb7c88b7, type: 3}
   - MemberName: RightHandPos
     Object: {fileID: 2100851939973127120}
 --- !u!114 &995357576

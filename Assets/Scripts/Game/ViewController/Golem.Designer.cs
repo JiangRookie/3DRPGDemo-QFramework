@@ -1,12 +1,10 @@
-// Generate Id:28387f5b-f402-4ad1-b6da-1cdefcebc572
+// Generate Id:b001a2c3-fa02-48b8-b47d-53175dd86932
 using UnityEngine;
 
 namespace Game
 {
 	public partial class Golem
 	{
-
-		public UnityEngine.GameObject Rock;
 
 		public UnityEngine.GameObject RightHandPos;
 
