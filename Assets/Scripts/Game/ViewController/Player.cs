@@ -150,8 +150,9 @@ namespace Game
 					}
 					SelfAnimator.runtimeAnimatorController = ComboList[_ComboCounter].AnimatorOV;
 					SelfAnimator.Play("Attack", 0, 0);
-					PlayerData.MinDamage.Value = ComboList[_ComboCounter].Damage;
-					PlayerData.MaxDamage.Value = ComboList[_ComboCounter].Damage;
+					PlayerData.MinDamage.Value = ComboList[_ComboCounter].MinDamage;
+					PlayerData.MaxDamage.Value = ComboList[_ComboCounter].MaxDamage;
+					PlayerData.AttackRange.Value = ComboList[_ComboCounter].AttackRange;
 					_ComboCounter++;
 					_LastClickedTime = Time.time;
 				}

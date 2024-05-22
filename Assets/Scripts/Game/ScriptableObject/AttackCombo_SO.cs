@@ -6,6 +6,8 @@ namespace Game.SO
 	public class AttackCombo_SO : ScriptableObject
 	{
 		public AnimatorOverrideController AnimatorOV;
-		public int Damage;
+		public int MinDamage;
+		public int MaxDamage;
+		public float AttackRange;
 	}
 }

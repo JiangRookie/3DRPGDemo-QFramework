@@ -10,7 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80c3e488f8f44fbeb0ae540807afef8c, type: 3}
-  m_Name: AttackCombo2
+  m_Name: AttackCombo1
   m_EditorClassIdentifier: 
-  AnimatorOV: {fileID: 22100000, guid: ee20b897fca904403839970e8ea80260, type: 2}
-  Damage: 4
+  AnimatorOV: {fileID: 22100000, guid: 9078164c0806e40be972c83e856b815c, type: 2}
+  MinDamage: 2
+  MaxDamage: 4
+  AttackRange: 1
