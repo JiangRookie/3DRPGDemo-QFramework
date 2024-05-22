@@ -162,7 +162,7 @@ namespace QFramework
         
         public void Deinit()
         {
-            if (Action.ActionID == ActionID)
+            if (Action != null && Action.ActionID == ActionID)
             {
                 Action.Deinit();
             }
