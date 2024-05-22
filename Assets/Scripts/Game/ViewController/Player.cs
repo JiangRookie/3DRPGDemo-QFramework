@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using Game.SO;
 using QFramework;
 using UnityEngine;
@@ -14,15 +15,15 @@ namespace Game
 		private float _AttackCooldown;
 		private GameObject _AttackTarget;
 		private int _ComboCounter;
+		private float _InitStopDistance;
 		private bool _IsAttacking = false;
 		private bool _IsDead;
 		private float _LastClickedTime;
 		private float _LastCombaEnd;
-		private float _StopDistance;
 
 		private void Awake()
 		{
-			_StopDistance = SelfNavMeshAgent.stoppingDistance;
+			_InitStopDistance = SelfNavMeshAgent.stoppingDistance;
 		}
 
 		private void Start()
@@ -34,15 +35,19 @@ namespace Game
 			MouseManager.OnEnemyClicked
 			   .Register(MoveToAttackTarget)
 			   .UnRegisterWhenGameObjectDestroyed(gameObject);
+
+			PlayerData.CurHealth.RegisterWithInitValue(value =>
+			{
+				if (value <= 0)
+				{
+					_IsDead = true;
+					GameManager.Instance.NotifyObservers();
+				}
+			}).UnRegisterWhenCurrentSceneUnloaded();
 		}
 
 		private void Update()
 		{
-			if (PlayerData.CurHealth.Value <= 0)
-			{
-				_IsDead = true;
-				GameManager.Instance.NotifyObservers();
-			}
 			_AttackCooldown -= Time.deltaTime;
 			SwitchAnimation();
 			ExitAttack();
@@ -80,11 +85,11 @@ namespace Game
 
 		private void MoveToTarget(Vector3 targetPoint)
 		{
-			StopAllCoroutines();
 			if (_IsDead) return;
-			SelfNavMeshAgent.stoppingDistance = _StopDistance;
-			SelfNavMeshAgent.isStopped = false;
+			_IsAttacking = false;
+			SelfNavMeshAgent.stoppingDistance = _InitStopDistance;
 			SelfNavMeshAgent.destination = targetPoint;
+			SelfNavMeshAgent.isStopped = false;
 		}
 
 		private void MoveToAttackTarget(GameObject targetGameObj)
@@ -95,7 +100,7 @@ namespace Game
 				_AttackTarget = targetGameObj;
 				SelfNavMeshAgent.isStopped = false;
 				SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value;
-				transform.LookAt(_AttackTarget.transform);
+				transform.DOLookAt(_AttackTarget.Position(), 0.25f);
 				_IsAttacking = true;
 			}
 		}
@@ -106,9 +111,24 @@ namespace Game
 			{
 				PlayerData.IsCritical.Value = Random.value <= PlayerData.CriticalHitRate.Value;
 				SelfAnimator.SetBool(AnimatorHash.Critical, PlayerData.IsCritical.Value);
-
-				// SelfAnimator.SetTrigger(AnimatorHash.Attack);
-				Attack();
+				if (Time.time - _LastCombaEnd > 0.2f)
+				{
+					CancelInvoke(nameof(EndCombo));
+					if (Time.time - _LastClickedTime >= 0.2f)
+					{
+						if (_ComboCounter >= ComboList.Count)
+						{
+							_ComboCounter = 0;
+						}
+						SelfAnimator.runtimeAnimatorController = ComboList[_ComboCounter].AnimatorOV;
+						SelfAnimator.Play("Attack", 0, 0);
+						PlayerData.MinDamage.Value = ComboList[_ComboCounter].MinDamage;
+						PlayerData.MaxDamage.Value = ComboList[_ComboCounter].MaxDamage;
+						PlayerData.AttackRange.Value = ComboList[_ComboCounter].AttackRange;
+						_ComboCounter++;
+						_LastClickedTime = Time.time;
+					}
+				}
 				_AttackCooldown = PlayerData.CoolDown.Value;
 			}
 			else
@@ -117,6 +137,22 @@ namespace Game
 			}
 		}
 
+		private void ExitAttack()
+		{
+			if (SelfAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f &&
+				SelfAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+			{
+				Invoke(nameof(EndCombo), 1f);
+			}
+		}
+
+		private void EndCombo()
+		{
+			_ComboCounter = 0;
+			_LastCombaEnd = Time.time;
+		}
+
+		// Call by Animation Event, deal damage to target
 		public void Hit()
 		{
 			if (!_AttackTarget) return;
@@ -135,42 +171,6 @@ namespace Game
 						_AttackTarget.GetComponent<IGetHit>().GetHit();
 					});
 			}
-		}
-
-		private void Attack()
-		{
-			if (Time.time - _LastCombaEnd > 0.2f)
-			{
-				CancelInvoke(nameof(EndCombo));
-				if (Time.time - _LastClickedTime >= 0.2f)
-				{
-					if (_ComboCounter >= ComboList.Count)
-					{
-						_ComboCounter = 0;
-					}
-					SelfAnimator.runtimeAnimatorController = ComboList[_ComboCounter].AnimatorOV;
-					SelfAnimator.Play("Attack", 0, 0);
-					PlayerData.MinDamage.Value = ComboList[_ComboCounter].MinDamage;
-					PlayerData.MaxDamage.Value = ComboList[_ComboCounter].MaxDamage;
-					PlayerData.AttackRange.Value = ComboList[_ComboCounter].AttackRange;
-					_ComboCounter++;
-					_LastClickedTime = Time.time;
-				}
-			}
-		}
-
-		private void ExitAttack()
-		{
-			if (SelfAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f && SelfAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
-			{
-				Invoke(nameof(EndCombo), 1f);
-			}
-		}
-
-		private void EndCombo()
-		{
-			_ComboCounter = 0;
-			_LastCombaEnd = Time.time;
 		}
 	}
 }
