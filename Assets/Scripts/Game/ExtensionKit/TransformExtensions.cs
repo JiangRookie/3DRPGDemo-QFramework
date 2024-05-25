@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using QFramework;
+using UnityEngine;
 
 namespace Game
 {
@@ -13,7 +14,22 @@ namespace Game
 
 		public static bool IsFacingTarget(this Transform self, GameObject target, float dotThreshold = 0.5f)
 		{
-			return self.IsFacingTarget(target.transform, dotThreshold);
+			return target && self.IsFacingTarget(target.transform, dotThreshold);
+		}
+
+		public static float Distance(this Vector3 self, Vector3 target)
+		{
+			return Vector3.Distance(self, target);
+		}
+
+		public static bool IsInRange(this Transform self, Transform target, float range)
+		{
+			return target && self.position.Distance(target.position) <= range;
+		}
+
+		public static bool IsInRange(this Transform self, GameObject target, float range)
+		{
+			return target && self.position.Distance(target.Position()) <= range;
 		}
 	}
 }

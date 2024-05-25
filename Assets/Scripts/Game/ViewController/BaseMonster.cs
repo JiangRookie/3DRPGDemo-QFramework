@@ -1,3 +1,4 @@
+using DG.Tweening;
 using QFramework;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,38 +13,40 @@ namespace Game
 	[RequireComponent(typeof(NavMeshAgent))]
 	[RequireComponent(typeof(BoxCollider))]
 	[RequireComponent(typeof(CharacterData))]
-	public partial class BaseMonster : ViewController, IEndGameObserver, IGetHit
+	public partial class BaseMonster : ViewController, IGameEndObserver, IGetHit
 	{
 		[SerializeField] private float _ViewRange;
 		[SerializeField] private float _PatrolRange;
 		[SerializeField] private float _LookAtTime;
 		[SerializeField] private bool _IsGuard;
-		private float _AttackCooldown;
+
 		protected GameObject _AttackTarget;
-		private Collider[] _Colliders = new Collider[10];
-		private Vector3 _InitPosition;
-		private string[] _LayerNames = new[] { "Player" };
+		private float _RemainingAttackCooldown;
+
+		private bool _IsWalk;
+		private bool _IsFollow;
+		private bool _IsChase;
+		private bool _IsDead;
 		private bool _PlayerIsDead;
-		private int _PlayerLayerMask;
 		private float _RemainLookAtTime;
-		private Vector3 WayPoint { get; set; }
-		private EnemyState State { get; set; }
-		private float InitSpeed { get; set; }
-		private Vector3 InitPosition { get; set; }
-		private Quaternion InitRotation { get; set; }
-		private bool IsChase { get; set; }
-		private bool IsDead { get; set; }
-		private bool IsFollow { get; set; }
-		private bool IsWalk { get; set; }
+		private EnemyState _State;
+		private Vector3 _WayPoint;
+
+		private Vector3 _InitPosition;
+		private Quaternion _InitRotation;
+		private float _InitSpeed;
+
+		private Collider[] _Colliders = new Collider[10];
+		private int _PlayerLayerMask;
+		private string[] _LayerNames = new[] { "Player" };
 
 		private void Awake()
 		{
-			InitPosition = transform.Position();
-			InitRotation = transform.Rotation();
-			InitSpeed = SelfNavMeshAgent.speed;
 			_InitPosition = this.Position();
-			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
+			_InitRotation = this.Rotation();
+			_InitSpeed = SelfNavMeshAgent.speed;
 			_RemainLookAtTime = _LookAtTime;
+			_PlayerLayerMask = LayerMask.GetMask(_LayerNames);
 		}
 
 		private void Start()
@@ -54,86 +57,59 @@ namespace Game
 
 		private void Update()
 		{
-			CheckAndSetDeadState();
+			DeathDetection();
 			if (!_PlayerIsDead)
 			{
-				_AttackCooldown -= Time.deltaTime;
+				_RemainingAttackCooldown -= Time.deltaTime;
 				SwitchStates();
 				SetAnimationState();
 			}
 		}
 
-		private void OnDisable()
-		{
-			GameManager.Instance.RemoveObserver(this);
-		}
+		private void OnDisable() => GameManager.Instance.RemoveObserver(this);
 
-		private void OnApplicationQuit()
-		{
-			gameObject.Hide();
-		}
+		private void OnApplicationQuit() => gameObject.Hide();
 
-		public void EndNotify()
-		{
-			_PlayerIsDead = true;
-			_AttackTarget = null;
-			SetWinState();
-		}
-
-		public void GetHit()
-		{
-			SelfAnimator.SetTrigger(AnimatorHash.GetHit);
-		}
-
-		public void SetInitialState(bool isGuard)
+		private void SetInitialState(bool isGuard)
 		{
 			if (isGuard)
 			{
-				State = EnemyState.Guard;
+				_State = EnemyState.Guard;
 			}
 			else
 			{
-				State = EnemyState.Patrol;
+				_State = EnemyState.Patrol;
 				GeneratePatrolPoint();
 			}
 		}
 
-		public void CheckAndSetDeadState()
+		private void DeathDetection()
 		{
-			if (SelfCharacterData.CurHealth <= 0)
-			{
-				IsDead = true;
-			}
+			if (SelfCharacterData.CurHealth > 0) return;
+			_IsDead = true;
 		}
 
-		public void SetAnimationState()
+		private void SetAnimationState()
 		{
-			SelfAnimator.SetBool(AnimatorHash.Walk, IsWalk);
-			SelfAnimator.SetBool(AnimatorHash.Follow, IsFollow);
-			SelfAnimator.SetBool(AnimatorHash.Chase, IsChase);
+			SelfAnimator.SetBool(AnimatorHash.Walk, _IsWalk);
+			SelfAnimator.SetBool(AnimatorHash.Follow, _IsFollow);
+			SelfAnimator.SetBool(AnimatorHash.Chase, _IsChase);
 			SelfAnimator.SetBool(AnimatorHash.Critical, SelfCharacterData.IsCritical);
-			SelfAnimator.SetBool(AnimatorHash.Die, IsDead);
-		}
-
-		public void SetWinState()
-		{
-			SelfAnimator.SetBool(AnimatorHash.Win, true);
-			IsChase = false;
-			IsWalk = false;
+			SelfAnimator.SetBool(AnimatorHash.Die, _IsDead);
 		}
 
 		private void SwitchStates()
 		{
-			if (IsDead)
+			if (_IsDead)
 			{
-				State = EnemyState.Dead;
+				_State = EnemyState.Dead;
 			}
 			else if (IsPlayerInRange())
 			{
-				State = EnemyState.Chase;
+				_State = EnemyState.Chase;
 			}
 
-			switch (State)
+			switch (_State)
 			{
 				case EnemyState.Guard:
 					Guard();
@@ -152,28 +128,30 @@ namespace Game
 
 		private void Guard()
 		{
-			IsChase = false;
-			if (this.Position() != InitPosition)
+			_IsChase = false;
+			_IsFollow = false;
+			if (this.Position() != _InitPosition)
 			{
-				IsWalk = true;
+				_IsWalk = true;
 				SelfNavMeshAgent.isStopped = false;
-				SelfNavMeshAgent.destination = InitPosition;
+				SelfNavMeshAgent.destination = _InitPosition;
 
-				if (Vector3.Distance(InitPosition, this.Position()) <= SelfNavMeshAgent.stoppingDistance)
+				if (this.Position().Distance(_InitPosition) <= SelfNavMeshAgent.stoppingDistance)
 				{
-					IsWalk = false;
-					transform.rotation = Quaternion.Lerp(transform.rotation, InitRotation, 0.01f);
+					_IsWalk = false;
+					transform.rotation = Quaternion.Lerp(transform.rotation, _InitRotation, 0.01f);
 				}
 			}
 		}
 
 		private void Patrol()
 		{
-			IsChase = false;
-			SelfNavMeshAgent.speed = InitSpeed * 0.5f;
-			if (Vector3.Distance(this.Position(), WayPoint) <= SelfNavMeshAgent.stoppingDistance)
+			_IsChase = false;
+			_IsFollow = false;
+			SelfNavMeshAgent.speed = _InitSpeed * 0.5f;
+			if (this.Position().Distance(_WayPoint) <= SelfNavMeshAgent.stoppingDistance)
 			{
-				IsWalk = false;
+				_IsWalk = false;
 				if (_RemainLookAtTime > 0)
 				{
 					_RemainLookAtTime -= Time.deltaTime;
@@ -186,19 +164,19 @@ namespace Game
 			}
 			else
 			{
-				IsWalk = true;
-				SelfNavMeshAgent.destination = WayPoint;
+				_IsWalk = true;
+				SelfNavMeshAgent.destination = _WayPoint;
 			}
 		}
 
 		private void Chase()
 		{
-			IsWalk = false;
-			IsChase = true;
-			SelfNavMeshAgent.speed = InitSpeed;
+			_IsWalk = false;
+			_IsChase = true;
+			SelfNavMeshAgent.speed = _InitSpeed;
 			if (!IsPlayerInRange())
 			{
-				IsFollow = false;
+				_IsFollow = false;
 				if (_RemainLookAtTime > 0)
 				{
 					SelfNavMeshAgent.destination = this.Position();
@@ -206,25 +184,25 @@ namespace Game
 				}
 				else if (_IsGuard)
 				{
-					State = EnemyState.Guard;
+					_State = EnemyState.Guard;
 				}
 				else
 				{
-					State = EnemyState.Patrol;
+					_State = EnemyState.Patrol;
 				}
 			}
 			else
 			{
 				SelfNavMeshAgent.destination = _AttackTarget.Position();
-				IsFollow = true;
+				_IsFollow = true;
 				SelfNavMeshAgent.isStopped = false;
 			}
 
-			bool isTargetInAttackRange = IsTargetInAttackRange();
-			bool isTargetInSkillRange = IsTargetInSkillRange();
+			bool isTargetInAttackRange = transform.IsInRange(_AttackTarget, SelfCharacterData.AttackRange);
+			bool isTargetInSkillRange = transform.IsInRange(_AttackTarget, SelfCharacterData.SkillRange);
 			if (isTargetInAttackRange || isTargetInSkillRange)
 			{
-				IsFollow = false;
+				_IsFollow = false;
 				SelfNavMeshAgent.isStopped = true;
 				AttackTarget(isTargetInAttackRange, isTargetInSkillRange);
 			}
@@ -239,19 +217,17 @@ namespace Game
 
 		private void AttackTarget(bool isTargetInAttackRange, bool isTargetInSkillRange)
 		{
-			if (_AttackCooldown < 0)
+			if (_RemainingAttackCooldown > 0) return;
+			_RemainingAttackCooldown = SelfCharacterData.CoolDown;
+			SelfCharacterData.IsCritical = Random.value <= SelfCharacterData.CriticalHitRate;
+			transform.DOLookAt(_AttackTarget.Position(), 0.25f);
+			if (isTargetInAttackRange)
 			{
-				_AttackCooldown = SelfCharacterData.CoolDown;
-				SelfCharacterData.IsCritical = Random.value <= SelfCharacterData.CriticalHitRate;
-				transform.LookAt(_AttackTarget.transform);
-				if (isTargetInAttackRange)
-				{
-					SelfAnimator.SetTrigger(AnimatorHash.Attack);
-				}
-				if (isTargetInSkillRange)
-				{
-					SelfAnimator.SetTrigger(AnimatorHash.Skill);
-				}
+				SelfAnimator.SetTrigger(AnimatorHash.Attack);
+			}
+			else if (isTargetInSkillRange)
+			{
+				SelfAnimator.SetTrigger(AnimatorHash.Skill);
 			}
 		}
 
@@ -269,29 +245,38 @@ namespace Game
 			return false;
 		}
 
-		private bool IsTargetInAttackRange() =>
-			_AttackTarget && _AttackTarget.Distance(this) <= SelfCharacterData.AttackRange;
-
-		private bool IsTargetInSkillRange() =>
-			_AttackTarget && _AttackTarget.Distance(this) <= SelfCharacterData.SkillRange;
-
-		// Animation Event
-		public void Hit()
-		{
-			if (_AttackTarget && transform.IsFacingTarget(_AttackTarget))
-			{
-				PlayerData.TakeHurt(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
-			}
-		}
-
 		private void GeneratePatrolPoint()
 		{
 			float randomX = Random.Range(-_PatrolRange, _PatrolRange);
 			float randomZ = Random.Range(-_PatrolRange, _PatrolRange);
 			var newPoint = new Vector3(_InitPosition.x + randomX, _InitPosition.y, _InitPosition.z + randomZ);
-			WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
+			_WayPoint = NavMesh.SamplePosition(newPoint, out NavMeshHit hit, _PatrolRange, 1)
 				? hit.position
 				: _InitPosition;
+		}
+
+		// Animation Event
+		public void Hit()
+		{
+			if (transform.IsFacingTarget(_AttackTarget))
+			{
+				PlayerData.TakeHurt(SelfCharacterData, () => _AttackTarget.GetComponent<IGetHit>().GetHit());
+			}
+		}
+
+		void IGameEndObserver.GameEndNotify()
+		{
+			_PlayerIsDead = true;
+			_AttackTarget = null;
+			_IsChase = false;
+			_IsWalk = false;
+			_IsFollow = false;
+			SelfAnimator.SetBool(AnimatorHash.Win, true);
+		}
+
+		void IGetHit.GetHit()
+		{
+			SelfAnimator.SetTrigger(AnimatorHash.GetHit);
 		}
 	}
 }

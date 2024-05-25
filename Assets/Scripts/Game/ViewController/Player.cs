@@ -41,7 +41,7 @@ namespace Game
 				if (value <= 0)
 				{
 					_IsDead = true;
-					GameManager.Instance.NotifyObservers();
+					GameManager.Instance.GameEndNotify();
 				}
 			}).UnRegisterWhenCurrentSceneUnloaded();
 		}
