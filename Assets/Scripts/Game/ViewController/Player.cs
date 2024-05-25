@@ -63,18 +63,25 @@ namespace Game
 					AttackTarget();
 				}
 			}
+
+			if (Time.time - _LastClickedTime > 1.2f)
+			{
+				_ComboCounter = 0;
+			}
 		}
 
-		public void GetHit()
+		void IGetHit.GetHit()
 		{
 			SelfAnimator.SetTrigger(AnimatorHash.GetHit);
+			_ComboCounter = 0;
 		}
 
-		public void SetPushed(Vector3 pushedToPosition)
+		void IPushable.SetPushed(Vector3 pushedToPosition)
 		{
 			SelfNavMeshAgent.isStopped = true;
 			SelfNavMeshAgent.velocity = pushedToPosition;
 			SelfAnimator.SetTrigger(AnimatorHash.Dizzy);
+			_ComboCounter = 0;
 		}
 
 		private void SwitchAnimation()
