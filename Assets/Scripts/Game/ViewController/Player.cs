@@ -168,12 +168,8 @@ namespace Game
 			}
 			else if (_AttackTarget.CompareTag("Enemy"))
 			{
-				int damage = PlayerData.DealDamageToEnemy(_AttackTarget.GetComponent<CharacterData>(),
-					() =>
-					{
-						_AttackTarget.GetComponent<IGetHit>().GetHit();
-					});
-				DamageTextController.ShowDamage(_AttackTarget.Position() + Vector3.up, damage);
+				PlayerData.DealDamageToEnemy(_AttackTarget.GetComponent<CharacterData>(),
+					() => _AttackTarget.GetComponent<IGetHit>().GetHit());
 			}
 		}
 	}

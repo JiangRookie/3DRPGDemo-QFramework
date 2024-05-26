@@ -128,7 +128,7 @@ namespace Game
 			}
 		}
 
-		public int TakeDamage(int damage, Action<int> onDie = null)
+		public void TakeDamage(int damage, Action<int> onDie = null)
 		{
 			int realDamage = Mathf.Max(damage - CurDefense, 1);
 			CurHealth = Mathf.Max(CurHealth - realDamage, 0);
@@ -137,7 +137,7 @@ namespace Game
 			{
 				onDie?.Invoke(Exp);
 			}
-			return realDamage;
+			DamageTextController.ShowDamage(this.Position() + Vector3.up, realDamage);
 		}
 	}
 }
