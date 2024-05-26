@@ -15,4 +15,4 @@ MonoBehaviour:
   AnimatorOV: {fileID: 22100000, guid: ee20b897fca904403839970e8ea80260, type: 2}
   MinDamage: 3
   MaxDamage: 5
-  AttackRange: 1
+  AttackRange: 1.5

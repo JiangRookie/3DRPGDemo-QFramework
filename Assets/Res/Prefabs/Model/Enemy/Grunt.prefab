@@ -841,7 +841,7 @@ NavMeshAgent:
   m_Acceleration: 80
   avoidancePriority: 50
   m_AngularSpeed: 500
-  m_StoppingDistance: 0
+  m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -864,7 +864,7 @@ MonoBehaviour:
   MonsterName: 2
   CharacterBaseData: {fileID: 0}
   TemplateCharacterData: {fileID: 11400000, guid: 9fb1350c022d9a9459ae410bb5f5e12b, type: 2}
-  AttackData: {fileID: 11400000, guid: 527052ef5aba61f4aad052bc6b9dc5da, type: 2}
+  AttackData: {fileID: 11400000, guid: 123f0ddc9a2f6444b9d4824b6e015ffa, type: 2}
 --- !u!114 &2199353050781096921
 MonoBehaviour:
   m_ObjectHideFlags: 0

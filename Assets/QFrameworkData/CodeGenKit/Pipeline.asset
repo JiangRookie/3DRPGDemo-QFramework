@@ -20,11 +20,11 @@ MonoBehaviour:
     NameToFullName: []
     BindInfos: []
     ScriptsFolder: Assets/Scripts/Game/ViewController
-    ClassName: RockGenerate
+    ClassName: DamageTextController
     Namespace: Game
     MainCode: "using UnityEngine;\r\nusing QFramework;\r\n\r\nnamespace Game\r\n{\r\n\tpublic
-      partial class RockGenerate : ViewController\r\n\t{\r\n\t\tvoid Start()\r\n\t\t{\r\n\t\t\t//
+      partial class DamageTextController : ViewController\r\n\t{\r\n\t\tvoid Start()\r\n\t\t{\r\n\t\t\t//
       Code Here\r\n\t\t}\r\n\t}\r\n}\r\n"
-    DesignerCode: "// Generate Id:9358e382-3ae9-4146-9ac7-c069d63644e1\r\nusing UnityEngine;\r\n\r\nnamespace
-      Game\r\n{\r\n\tpublic partial class RockGenerate\r\n\t{\r\n\r\n\t\tpublic Game.Rock
-      Rock;\r\n\r\n\t}\r\n}\r\n"
+    DesignerCode: "// Generate Id:33bdad56-68a4-4b7d-9606-b55079952b63\r\nusing UnityEngine;\r\n\r\nnamespace
+      Game\r\n{\r\n\tpublic partial class DamageTextController\r\n\t{\r\n\r\n\t\tpublic
+      UnityEngine.GameObject FloatingText;\r\n\r\n\t}\r\n}\r\n"

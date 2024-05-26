@@ -38,11 +38,9 @@ namespace Game
 
 			PlayerData.CurHealth.RegisterWithInitValue(value =>
 			{
-				if (value <= 0)
-				{
-					_IsDead = true;
-					GameManager.Instance.GameEndNotify();
-				}
+				if (value > 0) return;
+				_IsDead = true;
+				GameManager.Instance.GameEndNotify();
 			}).UnRegisterWhenCurrentSceneUnloaded();
 		}
 
@@ -53,7 +51,7 @@ namespace Game
 			ExitAttack();
 			if (_IsAttacking)
 			{
-				if (_AttackTarget && _AttackTarget.Distance(this) > PlayerData.AttackRange.Value)
+				if (_AttackTarget && _AttackTarget.Distance(this) > PlayerData.AttackRange.Value + _InitStopDistance)
 				{
 					SelfNavMeshAgent.destination = _AttackTarget.Position();
 				}
@@ -102,14 +100,12 @@ namespace Game
 		private void MoveToAttackTarget(GameObject targetGameObj)
 		{
 			if (_IsDead) return;
-			if (targetGameObj)
-			{
-				_AttackTarget = targetGameObj;
-				SelfNavMeshAgent.isStopped = false;
-				SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value;
-				transform.DOLookAt(_AttackTarget.Position(), 0.25f);
-				_IsAttacking = true;
-			}
+			if (!targetGameObj) return;
+			_IsAttacking = true;
+			_AttackTarget = targetGameObj;
+			SelfNavMeshAgent.isStopped = false;
+			SelfNavMeshAgent.stoppingDistance = PlayerData.AttackRange.Value + _InitStopDistance;
+			transform.DOLookAt(_AttackTarget.Position(), 0.25f);
 		}
 
 		private void AttackTarget()
@@ -128,7 +124,7 @@ namespace Game
 							_ComboCounter = 0;
 						}
 						SelfAnimator.runtimeAnimatorController = ComboList[_ComboCounter].AnimatorOV;
-						SelfAnimator.Play("Attack", 0, 0);
+						SelfAnimator.Play(AnimatorHash.Attack, 0, 0);
 						PlayerData.MinDamage.Value = ComboList[_ComboCounter].MinDamage;
 						PlayerData.MaxDamage.Value = ComboList[_ComboCounter].MaxDamage;
 						PlayerData.AttackRange.Value = ComboList[_ComboCounter].AttackRange;
@@ -172,11 +168,12 @@ namespace Game
 			}
 			else if (_AttackTarget.CompareTag("Enemy"))
 			{
-				PlayerData.DealDamageToEnemy(_AttackTarget.GetComponent<CharacterData>(),
+				int damage = PlayerData.DealDamageToEnemy(_AttackTarget.GetComponent<CharacterData>(),
 					() =>
 					{
 						_AttackTarget.GetComponent<IGetHit>().GetHit();
 					});
+				DamageTextController.ShowDamage(_AttackTarget.Position() + Vector3.up, damage);
 			}
 		}
 	}
