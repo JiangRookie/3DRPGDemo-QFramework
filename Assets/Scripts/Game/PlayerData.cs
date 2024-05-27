@@ -116,8 +116,9 @@ namespace Game
 			ExpToNextLevel.Value += (int)(ExpToNextLevel.Value * LevelMultiplier);
 			MaxHealth.Value = (int)(MaxHealth.Value * LevelMultiplier);
 			CurHealth.Value = MaxHealth.Value;
-			MinDamage.Value += 1;
-			MaxDamage.Value += 1;
+			float attackIncrease = Mathf.Log10(CurLevel.Value + 1) * 5;
+			MinDamage.Value += (int)attackIncrease;
+			MaxDamage.Value += (int)attackIncrease;
 			CurDefense.Value += 1;
 		}
 	}
